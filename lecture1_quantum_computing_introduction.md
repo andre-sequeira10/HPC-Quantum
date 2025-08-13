@@ -181,7 +181,7 @@ for i in range(n):
 circuit_drawer(circuit, 'mpl')
 ```
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 ```
 *** Quantum State ***
  * Qubit Count : 3
@@ -236,7 +236,7 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
 ```
  *** Quantum State ***
@@ -296,7 +296,7 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
-![alt text](image-3.png)
+![alt text](images/image-3.png)
 ```
 *** Quantum State ***
  * Qubit Count : 2
@@ -337,7 +337,7 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
-![alt text](image-5.png)
+![alt text](images/image-5.png)
 ```
 *** Quantum State ***
  * Qubit Count : 4
