@@ -1,0 +1,10 @@
+{
+    "cSpell.ignoreWords": [
+        "SBATCH",
+        "cpus",
+        "ntasks",
+        "qubits",
+        "qulacs",
+        "srun"
+    ]
+}
