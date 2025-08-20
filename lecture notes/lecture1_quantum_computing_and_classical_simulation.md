@@ -11,13 +11,17 @@
 The *qubit* is the unit of information in a quantum computer. In a quantum computing system the qubit can be in a definite state 0 or 1 behaving as standard classical computer. In vector form, qubits represent our computational basis, usually represented as, 
 
 $$
-|0\rangle = \begin{pmatrix}1\\0\end{pmatrix} \quad ; \quad |1\rangle = \begin{pmatrix}0\\1\end{pmatrix}
+|0\rangle = \begin{pmatrix}1\\0\end{pmatrix}
+\quad ; \quad
+|1\rangle = \begin{pmatrix}0\\1\end{pmatrix}
 $$
 
 While the qubit can be in a definite classical state, it can also be a linear combination of both states - also known as a *superposition state*: 
 
 $$
-|\psi \rangle = \alpha |0 \rangle + \beta |1\rangle = \alpha \begin{pmatrix}1\\0\end{pmatrix} + \beta \begin{pmatrix}0\\1\end{pmatrix} = \begin{pmatrix}\alpha\\\beta\end{pmatrix}
+|\psi \rangle = \alpha |0 \rangle + \beta |1\rangle
+= \alpha \begin{pmatrix}1\\0\end{pmatrix} + \beta \begin{pmatrix}0\\1\end{pmatrix} 
+= \begin{pmatrix}\alpha\\\beta\end{pmatrix}
 $$
 
 where the qubit can be in a mixture of both 0 and 1 with *probability amplitudes*  $\alpha$ and $\beta$ , respectively. 
