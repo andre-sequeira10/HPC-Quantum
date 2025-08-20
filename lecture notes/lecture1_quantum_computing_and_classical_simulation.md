@@ -11,13 +11,13 @@
 The *qubit* is the unit of information in a quantum computer. In a quantum computing system the qubit can be in a definite state 0 or 1 behaving as standard classical computer. In vector form, qubits represent our computational basis, usually represented as, 
 
 $$
-|0\rangle = \begin{pmatrix}1\\0\end{pmatrix} \quad ; \quad |1\rangle = \begin{pmatrix}0\\1\end{pmatrix}
+|0\rangle = \begin{pmatrix}1 \\ 0\end{pmatrix} \quad ; \quad |1\rangle = \begin{pmatrix}0 \\ 1\end{pmatrix}
 $$
 
 While the qubit can be in a definite classical state, it can also be a linear combination of both states - also known as a *superposition state*: 
 
 $$
-|\psi \rangle = \alpha |0 \rangle + \beta |1\rangle = \alpha \begin{pmatrix}1\\0\end{pmatrix} + \beta \begin{pmatrix}0\\1\end{pmatrix} = \begin{pmatrix}\alpha\\\beta\end{pmatrix}
+|\psi \rangle = \alpha |0 \rangle + \beta |1\rangle = \alpha \begin{pmatrix}1 \\ 0\end{pmatrix} + \beta \begin{pmatrix}0 \\ 1\end{pmatrix} = \begin{pmatrix}\alpha \\ \beta\end{pmatrix}
 $$
 
 where the qubit can be in a mixture of both 0 and 1 with *probability amplitudes*  $\alpha$ and $\beta$ , respectively. 
@@ -77,6 +77,7 @@ As we can see, the amount of memory grows exponentially with the number of qubit
 ## 2. Single-qubit gates <a id ="2-single-qubit-gates-"></a>
 
 Qubits are manipulated with unitary operations called *gates* similar to classical logical circuits. Single-qubit operations are 2x2 complex unitary matrices. *Pauli matrices* are the most common single-qubit gates, which are defined as follows:
+
 $$
 X = \begin{pmatrix}
 0 & 1 \\
@@ -91,6 +92,7 @@ Z = \begin{pmatrix}
 0 & -1
 \end{pmatrix}
 $$
+
 Since a qubit is a vector in a 2-dimensional complex vector space, the Pauli matrices are unitary matrices that can be used to manipulate the qubit state as they are the generators of rotations around the axes of the Bloch sphere.
 For example, the Pauli-X gate flips the state of a qubit, i.e. $X |0\rangle = |1\rangle$ and $X |1\rangle = |0\rangle$ and the Rx gate rotates the qubit around the x-axis of the Bloch sphere by an angle $\theta$,
 
@@ -148,7 +150,7 @@ H = \frac{1}{\sqrt{2}} \begin{pmatrix}
 $$
 
 $$
-H |0\rangle = \frac{1}{\sqrt{2}}|0\rangle + \frac{1}{\sqrt{2}}|1\rangle = \begin{pmatrix}\tfrac{1}{\sqrt{2}}\\[2pt]\tfrac{1}{\sqrt{2}}\end{pmatrix}
+H |0\rangle = \frac{1}{\sqrt{2}}|0\rangle + \frac{1}{\sqrt{2}}|1\rangle = \begin{pmatrix}\tfrac{1}{\sqrt{2}} \\ \tfrac{1}{\sqrt{2}}\end{pmatrix}
 $$
 <div align="center">
 <img src="images/h.png" alt="Bloch sphere" width="350">
@@ -271,7 +273,6 @@ CNOT = |0\rangle\langle 0| \otimes I + |1\rangle\langle 1| \otimes X =
 1 & 0 & 0 & 0 \\
 0 & 1 & 0 & 0 \\
 0 & 0 & 0 & 1 \\
-
 0 & 0 & 1 & 0
 \end{pmatrix}
 $$
