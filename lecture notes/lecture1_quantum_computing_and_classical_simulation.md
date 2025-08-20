@@ -93,6 +93,7 @@ Z = \begin{pmatrix}
 $$
 Since a qubit is a vector in a 2-dimensional complex vector space, the Pauli matrices are unitary matrices that can be used to manipulate the qubit state as they are the generators of rotations around the axes of the Bloch sphere.
 For example, the Pauli-X gate flips the state of a qubit, i.e. $X |0\rangle = |1\rangle$ and $X |1\rangle = |0\rangle$ and the Rx gate rotates the qubit around the x-axis of the Bloch sphere by an angle $\theta$,
+
 $$
 R_x(\theta) = e^{-i \theta X / 2} =
 \cos(\theta/2) I - i \sin(\theta/2) X = \begin{pmatrix}
@@ -107,6 +108,7 @@ $$
 </div>
 
 The Y gate flips the state of a qubit with a complex phase shift, i.e. $Y |0\rangle = i |1\rangle$ and $Y |1\rangle = -i |0\rangle$. The Ry gate rotates the qubit around the y-axis of the Bloch sphere by an angle $\theta$,
+
 $$
 R_y(\theta) = e^{-i \theta Y / 2} =
 \cos(\theta/2) I - i \sin(\theta/2) Y =
@@ -115,6 +117,7 @@ R_y(\theta) = e^{-i \theta Y / 2} =
 \sin(\theta/2) & \cos(\theta/2)
 \end{pmatrix}
 $$
+
 <div align="center">
 <img src="images/ry.png" alt="Bloch sphere" width="350">
   <p><em>Figure 2: Ry rotation and respective statevector. </em></p>
@@ -198,6 +201,7 @@ circuit_drawer(circuit, 'mpl')
 If we were to measure the state after applying the Hadamard gate to $n$ qubits, we would get one of the $2^n$ states with *equal probability*. Therefore, to get to "quantum advantage", we need to manipulate the superposition, i.e. the amplitudes of the states, in such a way that we can retrieve the classical information of interest either with high probability or deterministically. One way of achieving this is through *quantum interference* - a phenomenon where the amplitudes of certain states can be amplified while others are suppressed.
 
 Hadamard gates are one the gates that can cause interference. For example, suppose we create the uniform superposition over two qubits, perform a phase shift and then apply another Hadamard gate,
+
 $$
 H Z H |0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix}
 1 & 1 \\
@@ -213,6 +217,7 @@ H Z H |0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix}
 \end{pmatrix}
 |0\rangle = \begin{pmatrix}0\\1\end{pmatrix} = |1\rangle
 $$
+
 we collapsed the superposition to a definite state $|1\rangle$ with probability 1.
 
 ```python
@@ -247,6 +252,7 @@ print(state)
 
 
 >**NOTE**: Schrodinger type simulators have a dense $2^n$ statevector and iteratively apply quantum gates to the state vector ,via matrix-vector multiplication, updating it at each step. However, not every quantum circuit requires all $2^n$ amplitudes to be tracked. For instance, quantum states constructed by single-qubit gates as presented above are *classically easy to simulate*. These prepare separable or *unentangled* states which means that the overal quantum state can be written as a tensor product of individual qubit states. For example, the 3-qubit uniform superposition state can be written as
+
 >$$
 H^{\otimes 3} |0\rangle^{\otimes 3} = \bigotimes_{i=0}^{2} \frac{1}{\sqrt{2}} (|0\rangle + |1\rangle)
 >$$
@@ -258,6 +264,7 @@ P(000) = |\frac{1}{\sqrt{2}}|^2 \cdot |\frac{1}{\sqrt{2}}|^2 \cdot |\frac{1}{\sq
 ## 3. Multi-qubit gates <a id ="3-multi-qubit-gates-"></a>
 
 Entangled states can be created by applying multi-qubit gates, which are unitary matrices that act on multiple qubits simultaneously. The most common multi-qubit gate is the *CNOT* (Controlled-NOT) gate, which flips the state of a target qubit if the control qubit is in the state $|1\rangle$. The CNOT gate is defined as follows:
+
 $$
 CNOT = |0\rangle\langle 0| \otimes I + |1\rangle\langle 1| \otimes X =
 \begin{pmatrix}
@@ -268,7 +275,9 @@ CNOT = |0\rangle\langle 0| \otimes I + |1\rangle\langle 1| \otimes X =
 0 & 0 & 1 & 0
 \end{pmatrix}
 $$
+
 where $I$ is the identity matrix and $X$ is the Pauli-X gate. The CNOT gate creates entanglement between the control and target qubits, i.e. it creates a state that cannot be written as a tensor product of individual qubit states. For example, if we apply the CNOT gate controlled by the uniform superposition state to a qubit in the zero state, we get the *Bell state*,
+
 $$
 |\Phi^+\rangle = \frac{1}{\sqrt{2}} (|00\rangle + |11\rangle)
 $$
@@ -309,9 +318,11 @@ Bell states are a special class of entangled states that exhibit strong correlat
 >**NOTE**: Simulating 40 qubits with a Schrodinger type statevector simulator require 16 TB of memory (See Table 1). However, even though we had HPC system with a memory to say 100 qubits, it doesn't mean we would be able to simulate every quantum system, because the computing time will be, in general, **exponential** since we are simulating n-qubit gates that happen natively at the hardware level in an actual quantum computer. However, there is still circuit classes where classically efficient simulation is indeed possible in polynomial time such as *Clifford circuits* - composed of gates of the set {H, CNOT, S}.
 >
 >Bell states or in general n-qubit Greenberger-Horne-Zeilinger (GHZ) states, 
+
 >$$
 |GHZ\rangle = \frac{1}{\sqrt{2}} (|00\ldots 0\rangle + |11\ldots 1\rangle)
 >$$
+
 >are good examples of highly entangled states implemented by Clifford circuits as presented below.  
 
 ```python
@@ -368,16 +379,18 @@ $n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.
 >Remarkably, Clifford circuits are not universal for quantum computation. Therefore, **entanglement is a necessary resource but not sufficient for both classical hardness and quantum computational advantage**.
 
 Universal quantum computation can be achieved by adding a single non-Clifford gate to the set of Clifford gates. An example is the Cliffor+T gate set, which includes the T gate defined as follows:
+
 $$
 T = \begin{pmatrix}
 1 & 0 \\
 0 & e^{i \pi / 4}
 \end{pmatrix}
 $$
+
 Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However Large non-Clifford content or magic make these simulators scale roughly exponentially in the T-count. A linear (or even moderate) number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, deep Clifford+T, QAOA at higher depth, quantum volume, chaotic dynamics), tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
-- **Data-parallelism** maps perfectly to hardware: every 1–2 qubit gate is a bulk stream over the $2^n$ amplitudes. That vectorized, embarrassingly parallel pattern saturates SIMD units, GPU SMs, and network bandwidth.
-- **Predictable scaling**: runtime $\approx c \, m\, 2^n / \text{throughput}$. As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
-- **Mature kernels**: libraries like cuStateVec / Lightning / Qulacs / Aer have hand-tuned kernels (fusion, cache-blocking, coalesced I/O) that squeeze the last drop out of CPUs/GPUs.
+- **Data-parallelism** maps perfectly to hardware: every 1–2 qubit gate is a bulk stream over the $2^n$ amplitudes. 
+- **Predictable scaling**: As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
+- **Mature kernels**: libraries like cuStateVec / Lightning / Qulacs / Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.
 
 >**Quantum simulator practical guidance**:
 >- Clifford only (H, S, CNOT) + Pauli measurements $\rightarrow$ stabilizer (poly-time/mem).
