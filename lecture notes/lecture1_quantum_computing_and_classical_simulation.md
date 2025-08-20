@@ -1,6 +1,6 @@
-# Quantum Computing and classical simulation
+# Lecture 1 - Quantum Computing and classical simulation
 
-- [Quantum Computing and classical simulation](#quantum-computing-and-classical-simulation)
+- [Lecture 1 - Quantum Computing and classical simulation](#lecture-1---quantum-computing-and-classical-simulation)
   - [1. Qubits and state vectors ](#1-qubits-and-state-vectors-)
   - [2. Single-qubit gates ](#2-single-qubit-gates-)
   - [3. Multi-qubit gates ](#3-multi-qubit-gates-)

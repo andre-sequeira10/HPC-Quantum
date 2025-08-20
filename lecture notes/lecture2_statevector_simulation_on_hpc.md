@@ -1,4 +1,4 @@
-# Quantum statevector simulation on HPC
+# Lecture 2 - Quantum statevector simulation on HPC
 
 
 ## Table of contents 
@@ -13,14 +13,16 @@
 ## 1. Naive and index-based statevector simulation <a name="naive-and-index-based-simulation"></a>
 
 A quantum state can be represented as a $2^n$-dimensional complex vector, where $n$ is the number of qubits,
-$$
+
+```math
 |\psi\rangle = \sum_{i=0}^{2^n - 1} \alpha_i |i\rangle = \begin{pmatrix}
 \alpha_0 \\
 \alpha_1 \\
 \vdots \\
 \alpha_{2^n-1}
 \end{pmatrix}
-$$
+```
+
 Statevector simulators store the quantum state in a dense vector of $2^n$ complex amplitudes $\alpha_i$. Recall the we need an amount of memory that grows exponentially with the number of qubits, $n$ as presented in Table 1 below.
 
 <div align="center">
@@ -47,7 +49,8 @@ Statevector simulators store the quantum state in a dense vector of $2^n$ comple
 </div>
 
 A quantum state is manipulated in general by a $2^n \times 2^n$ unitary and complex matrix $U$, which acts on the state as follows:
-$$
+
+```math
 |\psi'\rangle = U |\psi\rangle = \begin{pmatrix}
 u_{00} & u_{01} & \cdots & u_{0,2^n-1} \\
 u_{10} & u_{11} & \cdots & u_{1,2^n-1} \\
@@ -60,19 +63,21 @@ u_{2^n-1,0} & u_{2^n-1,1} & \cdots & u_{2^n-1,2^n-1}
 \vdots \\
 \alpha_{2^n-1}  
 \end{pmatrix}
-$$
+```
 
 Statevector simulation is the process of applying a quantum circuit to a quantum state, which can be represented as a sequence matrix vector multiplications. However, the matrix multiplication is not performed directly on the $2^n \times 2^n$ matrix, but rather decomposed into a sequence of 1- and 2-qubit gates, which are applied to the state vector and gates are applied by modifying the state vector in-place, based on the linear transformation induced by the gate. This happens because universal quantum computation is achieved with a set of 1- and 2-qubit gates, for instance the Clifford+T gate set {H, CNOT, S, T}. Figure 1 below depicts the decomposition of the 3-qubit Toffoli gate into a sequence of 1- and 2-qubit gates.
 
-<p align="center">
-<img src="images/phpv3x9Nz.png" alt="Bloch sphere" width="600">
-<em>Figure 1: Toffoli gate decomposition in 1 and 2 qubit gates</em>
-</p>
+<div align="center">
+  <img src="images/phpv3x9Nz.png" alt="Bloch sphere" width="600">
+  <br>
+  <em>Figure 1: Toffoli gate decomposition in 1 and 2 qubit gates</em>
+</div>
 
 That means that to understand statevector simulation, we solely need to understand how to apply 1- and 2-qubit gates to a quantum state. 
 
 Let us consider an example of a 1-qubit gate in a two qubit state. Consider the Hadamard gate $H$ acting on the least significant qubit of the state $|00\rangle$. Naively, we would write the overall matrix vector operation as, 
-$$
+
+```math
 (I \otimes H) |00\rangle = \begin{pmatrix}
 1 & 0 \\
 0 & 1
@@ -102,7 +107,7 @@ $$
 0 \\
 0
 \end{pmatrix}
-$$
+```
 
 A naive application of a quantum gate would require creating a $2^n \times 2^n$ matrix representing the gate's action on all qubits, and multiplying it with the $2^n$-sized state vector. But this is not feasible because:
 
@@ -120,7 +125,7 @@ Let’s denote:
 
 To apply a gate to qubit $q$, we loop over all indices $i$ such that bit $q$ is 0, and compute the index $j = i \oplus (1 \ll q)$, which flips bit $q$. Then we apply the gate $U$ is applied to the pair of amplitudes $(\alpha_i, \alpha_j)$ as follows:
 
-$$
+```math
 \begin{bmatrix}
 \alpha_i' \\ \alpha_j'
 \end{bmatrix}
@@ -129,15 +134,17 @@ U
 \begin{bmatrix}
 \alpha_i \\ \alpha_j
 \end{bmatrix}
-$$
+```
 
 This **2x2 matrix multiplication** is done for each pair $(i, j)$, allowing us to simulate gate effects efficiently without constructing the full matrix.
 
 ---
 
 Let us consider again the Hadamard gate $H$ acting on the least significant bit (qubit 0) of a 2-qubit state.
-$$\begin{bmatrix}\alpha_0 \\ \alpha_1 \\ \alpha_2 \\ \alpha_3\end{bmatrix} = \begin{bmatrix}1 \\ 0 \\ 0 \\ 0\end{bmatrix}
-$$
+
+```math
+\begin{bmatrix}\alpha_0 \\ \alpha_1 \\ \alpha_2 \\ \alpha_3\end{bmatrix} = \begin{bmatrix}1 \\ 0 \\ 0 \\ 0\end{bmatrix}
+```
 
 🔹 Binary Index Mapping
 
@@ -156,7 +163,7 @@ We apply a Hadamard gate to **qubit 0**, so we find all index pairs differing at
 
 Apply to (0, 1):
 
-$$
+```math
 \begin{bmatrix}
 \alpha_0' \\ \alpha_1'
 \end{bmatrix}
@@ -170,11 +177,11 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix} \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix}
-$$
+```
 
 (2, 3) are both 0 → unchanged.
 
-$$
+```math
 \begin{bmatrix}
 \alpha_2' \\ \alpha_3'
 \end{bmatrix}
@@ -184,12 +191,11 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix} 0 \\ 0 \end{bmatrix}
-$$
-
+```
 
 🔹 Merge pairs to get the final State
 
-$$
+```math
 \begin{bmatrix}
 \alpha_0' \\ \alpha_1' \\ \alpha_2' \\ \alpha_3'
 \end{bmatrix}
@@ -197,7 +203,7 @@ $$
 \begin{bmatrix}
 \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \\ 0 \\ 0
 \end{bmatrix}
-$$
+```
 
 ---
 
@@ -254,9 +260,11 @@ Examples:
 🔹 **Choosing the thread count T**
 
 Algorithmic upper bound per $k$-qubit gate on $n$-qubit states is given by the number of independent chunks $W = 2^{n-k}$ constrained by the hardware threads available on the node.
-$$
+
+```math
 T = \min\!\big(2^{\,n-k},\ \text{hardware threads}\big).
-$$
+```
+
 If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have enough chunks to keep all threads busy.
 
 ---
@@ -392,9 +400,10 @@ We size by **memory first**. With double precision, the state size is $16\cdot 2
 - **Deucalion x86 (2× EPYC 7742, 256 GiB DRAM/node):** use **128 GiB** per node as “safe”.
 
 Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
-$$
+
+```math
 \frac{16\cdot 2^n}{R}\le \text{safe bytes per node}.
-$$
+```
 
 #### 3.1 ARM partition (A64FX, safe ≈ 16 GiB per node) <a name="deucalions-arm-paritition-distributed"></a> 
 
@@ -430,9 +439,9 @@ $$
 *(x86 partition has 500 nodes total; up to $n=41$ fits comfortably.)*
 
 > **Inside each rank**, keep the single-node threading rule on the **local** problem size: for a $k$-qubit gate,
-> $$
-> T^*_{\text{rank}}\approx \min\big(\text{cores per rank},\ 2^{\,n-r-k}\big),
-> $$
+> 
+> $T^*_{\text{rank}}\approx \min\big(\text{cores per rank},\ 2^{\,n-r-k}\big)$
+> 
 > and expect speedup to plateau at the node’s **memory bandwidth**. 
 
 
