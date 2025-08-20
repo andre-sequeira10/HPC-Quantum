@@ -18,11 +18,11 @@ The *qubit* is the unit of information in a quantum computer. In a quantum compu
 
 While the qubit can be in a definite classical state, it can also be a linear combination of both states - also known as a *superposition state*: 
 
-$$
+```math
 |\psi \rangle = \alpha |0 \rangle + \beta |1\rangle
 = \alpha \begin{pmatrix}1\\0\end{pmatrix} + \beta \begin{pmatrix}0\\1\end{pmatrix} 
 = \begin{pmatrix}\alpha\\\beta\end{pmatrix}
-$$
+```
 
 where the qubit can be in a mixture of both 0 and 1 with *probability amplitudes*  $\alpha$ and $\beta$ , respectively. 
 >**Note**: This does not mean that the qubit is in either state with some probability and it just so happens that we do not know which - a qubit is not a probabilistic bit !! At the subatomic level, both states physically happen at the same time. Crucially, it encompasses classical probability theory because $\alpha$ and $\beta$  are complex numbers. These are complex to sustain the axioms of quantum theory as quantum states live in a complex Hilbert space.  Once the qubit is measured, it results in *superposition collapse* , returning again one classical bit of information with probabilities such that  $|\alpha|^2 + |\beta|^2 = 1$ 
@@ -208,7 +208,7 @@ If we were to measure the state after applying the Hadamard gate to $n$ qubits, 
 
 Hadamard gates are one the gates that can cause interference. For example, suppose we create the uniform superposition over two qubits, perform a phase shift and then apply another Hadamard gate,
 
-$$
+```math
 H Z H |0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix}
 1 & 1 \\
 1 & -1
@@ -222,7 +222,7 @@ H Z H |0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix}
 1 & -1
 \end{pmatrix}
 |0\rangle = \begin{pmatrix}0\\1\end{pmatrix} = |1\rangle
-$$
+```
 
 we collapsed the superposition to a definite state $|1\rangle$ with probability 1.
 
