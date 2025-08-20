@@ -1,3 +1,4 @@
+∏∏
 # Quantum Computing and classical simulation
 
 - [Quantum Computing and classical simulation](#quantum-computing-and-classical-simulation)
