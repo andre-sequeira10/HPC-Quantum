@@ -153,9 +153,10 @@ H = \frac{1}{\sqrt{2}} \begin{pmatrix}
 \end{pmatrix}
 $$
 
-$$
+```math
 H |0\rangle = \frac{1}{\sqrt{2}}|0\rangle + \frac{1}{\sqrt{2}}|1\rangle = \begin{pmatrix}\tfrac{1}{\sqrt{2}} \\ \tfrac{1}{\sqrt{2}}\end{pmatrix}
-$$
+```
+
 <div align="center">
 <img src="images/h.png" alt="Bloch sphere" width="350">
   <p><em>Figure 4: Single-qubit Hadamard gate applied to the state zero, and respective statevector. </em></p>
