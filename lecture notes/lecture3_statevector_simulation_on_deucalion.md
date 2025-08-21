@@ -29,5 +29,5 @@
                 <tr><td>normal-a100-80</td><td> </td><td> </td><td> </td></tr>
         </tbody>
     </table>
-    <p><em>Table 1: Partitions on Deucalion</em></p>
+    <p><em>Table 1: Standard publicly available partitions on Deucalion</em></p>
 </div>

@@ -1,16 +1,18 @@
 # Lecture 2 - Quantum statevector simulation on HPC
 
+- [Lecture 2 - Quantum statevector simulation on HPC](#lecture-2---quantum-statevector-simulation-on-hpc)
+  - [1. Naive and index-based statevector simulation ](#1-naive-and-index-based-statevector-simulation-)
+  - [2. Parallel state vector simulation ](#2-parallel-state-vector-simulation-)
+    - [2.1 Example: Deucalion's ARM partition ](#21-example-deucalions-arm-partition-)
+    - [2.2 Example: Deucalion's x86 partition ](#22-example-deucalions-x86-partition-)
+  - [3. Distributed statevector simulation ](#3-distributed-statevector-simulation-)
+    - [3.1 Example: Deucalion's ARM partition ](#31-example-deucalions-arm-partition-)
+    - [3.2 Example: Deucalion's x86 partition ](#32-example-deucalions-x86-partition-)
+    - [3.3 Example: Deucalion’s GPU partition ](#33-example-deucalions-gpu-partition-)
+  - [4. References ](#4-references-)
 
-## Table of contents 
-- [1. Naive and index-based statevector simulation]("naive-and-index-based-simulation")
-- [2. Parallel state vector simulation]("parallel-statevector-simulation")
-    - [2.1 Example: Deucalion's ARM partition]("deucalions-arm-paritition-parallel)
-    - [2.2 Example: Deucalion's x86 partition]("deucalions-x86-paritition-parallel)
-- [3. Distributed statevector simulation]("distributed-statevector-simulation")
-    - [3.1 Example: Deucalion's ARM partition]("deucalions-arm-paritition-distributed)
-    - [3.2 Example: Deucalion's x86 partition]("deucalions-x86-paritition-distributed)
+## 1. Naive and index-based statevector simulation <a id="1-naive-and-index-based-statevector-simulation-"></a>
 
-## 1. Naive and index-based statevector simulation <a name="naive-and-index-based-simulation"></a>
 
 A quantum state can be represented as a $2^n$-dimensional complex vector, where $n$ is the number of qubits,
 
@@ -235,7 +237,7 @@ such quadruples.
 *Intuition:* for 1-qubit gates you updated $2^{n-1}$ pairs via a $2\times2$ multiply; for 2-qubit gates you update $2^{n-2}$ quadruples via a $4\times4$ multiply.
 
 ---
-## 2. Parallel state vector simulation <a name="parallel-statevector-simulation"></a>
+## 2. Parallel state vector simulation <a id="2-parallel-state-vector-simulation-"></a>
 
 When you apply a gate to an n-qubit state vector $\boldsymbol{a}\in \mathbb{C}^{2^n}$, you never multiply a giant $2^n\times 2^n$ matrix. Instead, you update many independent chunks—tiny matrix–vector multiplies—in place:
 	•	1-qubit gate $U\in\mathbb{C}^{2\times2}$ → $2^{n-1}$ pairs $(a_{i_0},a_{i_1})$.
@@ -268,7 +270,7 @@ T = \min\!\big(2^{\,n-k},\ \text{hardware threads}\big).
 If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have enough chunks to keep all threads busy.
 
 ---
-🔹 **Example: Deucalion's ARM partition**
+### 2.1 Example: Deucalion's ARM partition <a id="21-example-deucalions-arm-partition-"></a>
 
 - 1632 nodes with 48-core A64FX chips.
 - Each compute core can handle one thread, resulting in a total of 48 threads per chip.
@@ -282,6 +284,8 @@ If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have e
 >**ARM node:** 48-core (one thread per core).  
 >**Rule:** Optimal threads $T^*=\min(48,\;2^{\,n-k})$ for a $k$-qubit gate on $n$ qubits.
 
+<div align="center">
+
 | Qubits $n$ | 1-qubit gate $T^*$ | 2-qubit gate $T^*$ |
 |---:|---:|---:|
 | 2 | 2 | 1 |
@@ -292,9 +296,12 @@ If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have e
 | 7 | 48 | 32 |
 | 8 | 48 | 48 |
 
+<p><em>Table 2: Optimal thread count $T^*$ for 1- and 2-qubit gates on Deucalion's ARM node (48 cores).</em></p>
+</div>
+
 Beyond 8 qubits, we cannot usefully employ more than 48 threads on a single ARM node, because the number of independent chunks $W$ is larger than the number of threads available.
 
-🔹 **Example: Deucalion's x86 partition**
+### 2.2 Example: Deucalion's x86 partition <a id="22-example-deucalions-x86-partition-"></a>
 
 - 500 nodes with 2 x AMD EPYC 7742 processors with 64 cores.
 - Each compute core can handle one thread, resulting in a total of 128 threads per node.
@@ -307,6 +314,8 @@ How can we schedule the number of threads on a single-node as a function of the 
 >**x86 node:** 128-core (one thread per core).  
 >**Rule:** Optimal threads $T^*=\min(128,\;2^{\,n-k})$ for a $k$-qubit gate on $n$ qubits.
 
+<div align="center">
+
 | Qubits \(n\) | 1-qubit gate \(T^*\) | 2-qubit gate \(T^*\) |
 |---:|---:|---:|
 | 2 | 2 | 1 |
@@ -318,26 +327,24 @@ How can we schedule the number of threads on a single-node as a function of the 
 | 8 | 128 | 64 |
 | 9 | 128 | 128 |
 
+<p><em>Table 3: Optimal thread count \(T^*\) for 1- and 2-qubit gates on Deucalion's x86 node (128 cores).</em></p>
+</div>
+
 Beyond 9 qubits, we cannot usefully employ more than 128 threads on a single x86 node, because the number of independent chunks \(W\) is larger than the number of threads available.
 
 ---
 
-## 3. Distributed statevector simulation <a name="distributed-statevector-simulation"></a>
+## 3. Distributed statevector simulation <a id="3-distributed-statevector-simulation-"></a>
 
 This section explains **how** a statevector is distributed across several nodes, then introduces **MPI ranks** and the notions of **local** and **global** qubits, and finally gives concrete **node-count tables** for Deucalion’s ARM and x86 partitions as examples.
 
 ---
 
-An $n$-qubit state is a length-$2^n$ complex vector
-$$
-|\psi\rangle=\sum_{x=0}^{2^n-1}\alpha_x |x\rangle,\quad \alpha_x\in\mathbb C.
-$$
-
-With **distributed simulation**, we split this vector across $R$ processes so that **each process stores a disjoint slice**:
+An $n$-qubit state is a length-$2^n$ complex vector. With **distributed simulation**, we split this vector across $R$ processes so that **each process stores a disjoint slice**:
 
 $$
-\text{amps per process}=\frac{2^n}{R},\qquad
-\text{bytes per process}=\frac{16\cdot 2^n}{R}\ \ \text{(complex128)}.
+\text{amplitudes per process}=\frac{2^n}{R},\qquad
+\text{bytes per process}=\frac{16\cdot 2^n}{R}
 $$
 
 A convenient way to view this is **bit slicing**. Let $r=\log_2 R$. We designate the **top $r$ index bits** as **distributed** (also called *global*), and the remaining $n-r$ as **local**. An amplitude index $x_{n-1}\dots x_1x_0$ belongs to the process whose rank ID equals the integer value of the **global** bits $x_{n-1}\dots x_{n-r}$. Inside that process, the **local** bits $x_{n-r-1}\dots x_0$ address the element within its slice.
@@ -377,22 +384,22 @@ State has 16 amplitudes $a[0..15]$. Let top two bits $x_3x_2$ be global.
 
 ---
 
-🔹 **3.3 What are processes, MPI, and MPI ranks?**
+🔹 **What are processes, MPI, and MPI ranks?**
 
 - **Process / task:** an OS program instance with its own address space.  
 - **MPI (Message Passing Interface):** the standard API for processes to communicate across nodes.  
 - **MPI rank:** the ID of a process within an MPI job $\{0,\dots,R-1\}$. In distributed simulation, **each rank stores a slice** of the state and participates in exchanges whenever a gate touches **global qubits**.
 
 > Practical tip: many simulators support **qubit reordering** (swap a global bit with a local one) so upcoming gates hit local qubits, reducing communication. Here is the excerpt from the [Nvidia CuStateVec simulator](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/distributed-index-bit-swap.html#distributed-state-vector-simulation):
->
-> <p align="center">
-<img src="images/custatevec.png" alt="Bloch sphere" width="600">
-<em>Figure 2: Distributed state vector simulation with qubit reordering from Nvidia CuStateVec simulator.</em>
-</p>
+<div align="center">
+  <img src="images/custatevec.png" alt="Distributed state vector simulation with qubit reordering from Nvidia CuStateVec simulator." width="600">
+  <br>
+  <em>Figure 2: Distributed state vector simulation with qubit reordering from Nvidia CuStateVec simulator.</em>
+</div>
 
 ---
 
-🔹 **How many nodes (ranks) do I need? Sizing to 40 qubits**
+🔹 **How many nodes do I need?**
 
 We size by **memory first**. With double precision, the state size is $16\cdot 2^n$ bytes. For safety we reserve room for workspace/OS, using a **per-node safe state capacity**:
 
@@ -405,36 +412,44 @@ Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
 \frac{16\cdot 2^n}{R}\le \text{safe bytes per node}.
 ```
 
-#### 3.1 ARM partition (A64FX, safe ≈ 16 GiB per node) <a name="deucalions-arm-paritition-distributed"></a> 
+### 3.1 Example: Deucalion's ARM partition <a id="31-example-deucalions-arm-partition-"></a>
 
-| Qubits $n$ | State size | Nodes $R$ (min $2^r$) | Per-rank state |
-|---:|---:|---:|---:|
-| 30 | 16 GiB | 1 | 16 GiB |
-| 31 | 32 GiB | 2 | 16 GiB |
-| 32 | 64 GiB | 4 | 16 GiB |
-| 33 | 128 GiB | 8 | 16 GiB |
-| 34 | 256 GiB | 16 | 16 GiB |
-| 35 | 512 GiB | 32 | 16 GiB |
-| 36 | 1 TiB | 64 | 16 GiB |
-| 37 | 2 TiB | 128 | 16 GiB |
-| 38 | 4 TiB | 256 | 16 GiB |
-| 39 | 8 TiB | 512 | 16 GiB |
-| 40 | 16 TiB | 1024 | 16 GiB |
+<div align="center">
 
-#### 3.2 x86 partition (256 GiB/node, safe ≈ 128 GiB per node) <a name="deucalions-x86-paritition-distributed"></a>
+| Qubits $n$ | State size | Nodes $R$ (min $2^r$) |
+|---:|---:|---:|
+| 30 | 16 GiB | 1 |
+| 31 | 32 GiB | 2 |
+| 32 | 64 GiB | 4 |
+| 33 | 128 GiB | 8 |
+| 34 | 256 GiB | 16 |
+| 35 | 512 GiB | 32 |
+| 36 | 1 TiB | 64 |
+| 37 | 2 TiB | 128 |
+| 38 | 4 TiB | 256 |
+| 39 | 8 TiB | 512 |
+| 40 | 16 TiB | 1024 |
+<p><em>Table 4: Minimum number of ARM nodes required for distributed statevector simulation up to 40 qubits.</em></p>
+</div>
 
-| Qubits $n$ | State size | Nodes $R$ (min $2^r$) | Per-rank state |
-|---:|---:|---:|---:|
-| 33 | 128 GiB | 1 | 128 GiB |
-| 34 | 256 GiB | 2 | 128 GiB |
-| 35 | 512 GiB | 4 | 128 GiB |
-| 36 | 1 TiB | 8 | 128 GiB |
-| 37 | 2 TiB | 16 | 128 GiB |
-| 38 | 4 TiB | 32 | 128 GiB |
-| 39 | 8 TiB | 64 | 128 GiB |
-| 40 | 16 TiB | 128 | 128 GiB |
-| 41 | 32 TiB | 256 | 128 GiB |
-| 42 | 64 TiB | 512 | 128 GiB |
+### 3.2 Example: Deucalion's x86 partition <a id="32-example-deucalions-x86-partition-"></a>
+
+<div align="center">
+
+| Qubits $n$ | State size | Nodes $R$ (min $2^r$) |
+|---:|---:|---:|
+| 33 | 128 GiB | 1 |
+| 34 | 256 GiB | 2 |
+| 35 | 512 GiB | 4 |
+| 36 | 1 TiB | 8 |
+| 37 | 2 TiB | 16 |
+| 38 | 4 TiB | 32 |
+| 39 | 8 TiB | 64 |
+| 40 | 16 TiB | 128 |
+| 41 | 32 TiB | 256 |
+| 42 | 64 TiB | 512 |
+<p><em>Table 5: Minimum number of x86 nodes required for distributed statevector simulation up to 42 qubits.</em></p>
+</div>
 
 *(x86 partition has 500 nodes total; up to $n=41$ fits comfortably.)*
 
@@ -444,8 +459,86 @@ Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
 > 
 > and expect speedup to plateau at the node’s **memory bandwidth**. 
 
+### 3.3 Example: Deucalion’s GPU partition <a id="33-example-deucalions-gpu-partition-"></a>
 
-### References
+- CPU: 2× AMD EPYC 7742 (128 CPU cores total)
+- GPUs: 4× NVIDIA A100 per node
+- VRAM per GPU:
+  - **A100-40**: 40 GB → we budget **~32 GiB** for the state (leave headroom for work buffers)
+  - **A100-80**: 80 GB → we budget **~64 GiB** for the state
+
+> Assume **double precision** state vectors: **16 bytes per amplitude**.
+
+---
+
+Let **C** be the **safe VRAM per GPU** reserved for the state:
+- A100-40: **C ≈ 32 GiB**
+- A100-80: **C ≈ 64 GiB**
+
+With **G GPUs on one node**, total safe state memory is **G·C**.
+
+- **Max n** fits if:  $16\cdot 2^n \le G\cdot C$.
+- Equivalently, $n \le \log_2(G) + \log_2(C/16)$.
+  - For A100-40, $C/16 = 2^{31}$ ⇒ **n ≤ 31 + log₂(G)**.
+  - For A100-80, $C/16 = 2^{32}$ ⇒ **n ≤ 32 + log₂(G)**.
+
+<div align="center">
+
+| GPUs on node | A100-40 max n | A100-80 max n |
+|---:|---:|---:|
+| 1 | 31 | 32 |
+| 2 | 32 | 33 |
+| 4 | 33 | 34 |
+
+<p><em>Table 6: Maximum number of qubits $n$ that fit on a single node with multiple A100 GPUs (double precision, safe VRAM).</em></p>
+</div>
+
+> Adding GPUs gives **+log₂(G)** qubits because memory scales linearly with GPU count.
+
+---
+
+🔹 Using A100-40 (C ≈ 32 GiB per GPU)
+
+<div align="center">
+
+| Qubits $n$ | GPUs (min) | Nodes (min) |
+|---:|---:|---:|
+| 31 | 1 | 1 |
+| 32 | 2 | 1 |
+| 33 | 4 | 1 |
+| 34 | 8 | 2 |
+| 35 | 16 | 4 |
+| 36 | 32 | 8 |
+| 37 | 64 | 16 |
+| 38 | 128 | 32 |
+| 39 | 256 | 64 |
+| 40 | 512 | 128 |
+
+<p><em>Table 7: Minimum number of A100-40 GPUs and nodes required for distributed statevector simulation up to 40 qubits.</em></p>
+</div>
+
+🔹 Using A100-80 (C ≈ 64 GiB per GPU)
+
+<div align="center">
+
+| Qubits $n$ | GPUs (min) | Nodes (min) |
+|---:|---:|---:|
+| 32 | 1 | 1 |
+| 33 | 2 | 1 |
+| 34 | 4 | 1 |
+| 35 | 8 | 2 |
+| 36 | 16 | 4 |
+| 37 | 32 | 8 |
+| 38 | 64 | 16 |
+| 39 | 128 | 32 |
+| 40 | 256 | 64 |
+
+<p><em>Table 8: Minimum number of A100-80 GPUs and nodes required for distributed statevector simulation up to 40 qubits.</em></p>
+</div>
+
+---
+
+## 4. References <a id="4-references-"></a>
 
 - [mpiQulacs: A Distributed Quantum Computer Simulator for A64FX-based Cluster Systems](https://arxiv.org/abs/2203.16044)
 - [NVIDIA cuStateVec overview](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/overview.html#multi-gpu-computation)
