@@ -209,34 +209,37 @@ Apply to (0, 1):
 
 ---
 
->**1-qubit gate generalization to  n-qubit States**
+> **1-qubit gate generalization to n-qubit States**
 >
->In general, applying a 1-qubit gate U on the q-th qubit of an n-qubit state vector is represented as repetitive multiplications of the unitary matrix and two-element vectors of probability amplitudes whose indices differ in the q-th bits of their binary index:
+> In general, applying a 1-qubit gate $U$ on the $q$-th qubit of an $n$-qubit state vector is represented as repetitive multiplications of the unitary matrix and two-element vectors of probability amplitudes whose indices differ in the $q$-th bit of their binary index:
+>
+> $$
+> \binom{a_{*\ldots*\,0_q\,*\ldots*}'}{a_{*\ldots*\,1_q\,*\ldots*}'}
+> =
+> \begin{pmatrix}
+> U_{00} & U_{01} \\
+> U_{10} & U_{11}
+> \end{pmatrix}
+> \binom{a_{*\ldots*\,0_q\,*\ldots*}}{a_{*\ldots*\,1_q\,*\ldots*}}
+> $$
+>
+> There are $2^{n-1}$ such pairs, and the gate is applied to each pair in a loop.
+> 
+> A two-qubit gate changes only amplitudes whose basis indices differ only at bits $q$ and $r$. Thus the $2^n$ amplitudes decompose into disjoint quadruples (groups of 4) of the form
 >
 >$$
-\binom{a_{* \ldots * 0_q * \ldots *}^{\prime}}{a_{* \ldots * 1_q * \ldots *}^{\prime}}=\left(\begin{array}{cc}
-U_{00} & U_{01} \\
-U_{10} & U_{11}
-\end{array}\right)\binom{a_{* \ldots * 0_q * \ldots *}}{a_{* \ldots * 1_q * \ldots *}}
+>\big(\alpha_{i_{00}},\,\alpha_{i_{01}},\,\alpha_{i_{10}},\,\alpha_{i_{11}}\big),
 >$$
->There are $2^{n-1}$ such pairs, and the gate is applied to each pair in a loop.
+>
+>There are exactly
+>$
+>\frac{2^n}{4}=2^{n-2}
+>$
+>such quadruples.
+>
+>*Intuition:* for 1-qubit gates you updated $2^{n-1}$ pairs via a $2\times2$ multiply; for 2-qubit gates you update $2^{n-2}$ quadruples via a $4\times4$ multiply.
 
-A two-qubit gate changes only amplitudes whose basis indices differ only at bits $q$ and $r$.  
-Thus the $2^n$ amplitudes decompose into disjoint quadruples (groups of 4) of the form
 
-$$
-\big(\alpha_{i_{00}},\,\alpha_{i_{01}},\,\alpha_{i_{10}},\,\alpha_{i_{11}}\big),
-$$
-
-There are exactly
-$
-\frac{2^n}{4}=2^{n-2}
-$
-such quadruples.
-
-*Intuition:* for 1-qubit gates you updated $2^{n-1}$ pairs via a $2\times2$ multiply; for 2-qubit gates you update $2^{n-2}$ quadruples via a $4\times4$ multiply.
-
----
 ## 2. Parallel state vector simulation <a id="2-parallel-state-vector-simulation-"></a>
 
 When you apply a gate to an n-qubit state vector $\boldsymbol{a}\in \mathbb{C}^{2^n}$, you never multiply a giant $2^n\times 2^n$ matrix. Instead, you update many independent chunks—tiny matrix–vector multiplies—in place:
@@ -332,13 +335,10 @@ How can we schedule the number of threads on a single-node as a function of the 
 
 Beyond 9 qubits, we cannot usefully employ more than 128 threads on a single x86 node, because the number of independent chunks \(W\) is larger than the number of threads available.
 
----
 
 ## 3. Distributed statevector simulation <a id="3-distributed-statevector-simulation-"></a>
 
 This section explains **how** a statevector is distributed across several nodes, then introduces **MPI ranks** and the notions of **local** and **global** qubits, and finally gives concrete **node-count tables** for Deucalion’s ARM and x86 partitions as examples.
-
----
 
 An $n$-qubit state is a length-$2^n$ complex vector. With **distributed simulation**, we split this vector across $R$ processes so that **each process stores a disjoint slice**:
 
