@@ -254,11 +254,7 @@ These chunks can be processed sequentially (one thread) or in parallel (many thr
 
 🔹 **Parallel work: how many threads can you use?**
 
-Two limits:
-
-1.	Parallel work units. For a k-qubit gate on n qubits you have $W = 2^{\,n-k}$ independent chunks. You cannot usefully employ more than W threads on that gate.
-2.	Memory bandwidth. State-vector updates are bandwidth-bound (few flops, many bytes). Speedup rises with threads until the node’s memory bandwidth is saturated; beyond that, extra threads don’t help.
-
+For a k-qubit gate on n qubits you have $W = 2^{n-k}$ independent chunks. You cannot usefully employ more than W threads on that gate.
 Examples:
 - $n=3$, 2-qubit gate → $W=2$: up to 2 threads useful.
 - $n=4$, 2-qubit gate → $W=4$: up to 4 threads useful.
@@ -281,13 +277,13 @@ If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have e
 - Each compute core can handle one thread, resulting in a total of 48 threads per chip.
 - Each node has 32 GB HBM2 RAM. Therefore the partition has 52TB of RAM in total.
 
->From Table 1 we see that a single ARM compute node can efficiently store and safely manipulate quantum states up to 30 qubits ($16*2^{30}=16$GB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
+>From Table 1 we see that a single ARM compute node can efficiently store and safely manipulate quantum states up to 30 qubits ( $16 \times 2^{30}=16$ GB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
 
  How can we schedule the number of threads on a single-node as a function of the number of qubits?
 
 
 >**ARM node:** 48-core (one thread per core).  
->**Rule:** Optimal threads $T^*=\min(48,\;2^{\,n-k})$ for a $k$-qubit gate on $n$ qubits.
+>**Rule:** Optimal threads $T^*=\min(48 , 2^{n-k})$ for a $k$-qubit gate on $n$ qubits.
 
 <div align="center">
 
@@ -312,12 +308,12 @@ Beyond 8 qubits, we cannot usefully employ more than 48 threads on a single ARM 
 - Each compute core can handle one thread, resulting in a total of 128 threads per node.
 - Each node has 256GB RAM. Therefore the partition has 128TB of RAM in total.
 
->From Table 1 we see that a single x86 compute node can efficiently store and safely manipulate quantum states up to 33 qubits ($16*2^{33}=128$GB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
+>From Table 1 we see that a single x86 compute node can efficiently store and safely manipulate quantum states up to 33 qubits ( $16 \times 2^{33}=128$ GB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
 
 How can we schedule the number of threads on a single-node as a function of the number of qubits?
 
 >**x86 node:** 128-core (one thread per core).  
->**Rule:** Optimal threads $T^*=\min(128,\;2^{\,n-k})$ for a $k$-qubit gate on $n$ qubits.
+>**Rule:** Optimal threads $T^*=\min(128,2^{n-k})$ for a $k$-qubit gate on $n$ qubits.
 
 <div align="center">
 
