@@ -125,7 +125,7 @@ Let’s denote:
 - Index $i$ as the binary representation of the basis state.
 - Bit  $q$ refers to qubit  $q$ in the binary string.
 
-To apply a gate to qubit $q$, we loop over all indices $i$ such that bit $q$ is 0, and compute the index $j = i \oplus (1 \ll q)$, which flips bit $q$. Then we apply the gate $U$ is applied to the pair of amplitudes $(\alpha_i, \alpha_j)$ as follows:
+To apply a gate to qubit $q$, we loop over all indices $i$ such that bit $q$ is 0, and compute the index $j$, which flips bit $q$. Then we apply the gate $U$ is applied to the pair of amplitudes $(\alpha_i, \alpha_j)$ as follows:
 
 ```math
 \begin{bmatrix}
