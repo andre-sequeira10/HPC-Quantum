@@ -214,13 +214,19 @@ Apply to (0, 1):
 > In general, applying a 1-qubit gate $U$ on the $q$-th qubit of an $n$-qubit state vector is represented as repetitive multiplications of the unitary matrix and two-element vectors of probability amplitudes whose indices differ in the $q$-th bit of their binary index:
 >
 > $$
-> \binom{a_{*\ldots*\,0_q\,*\ldots*}'}{a_{*\ldots*\,1_q\,*\ldots*}'}
+> \begin{pmatrix}
+> a'_{*\ldots*\,0_q\,*\ldots*} \\
+> a'_{*\ldots*\,1_q\,*\ldots*}
+> \end{pmatrix}
 > =
 > \begin{pmatrix}
 > U_{00} & U_{01} \\
 > U_{10} & U_{11}
 > \end{pmatrix}
-> \binom{a_{*\ldots*\,0_q\,*\ldots*}}{a_{*\ldots*\,1_q\,*\ldots*}}
+> \begin{pmatrix}
+> a_{*\ldots*\,0_q\,*\ldots*} \\
+> a_{*\ldots*\,1_q\,*\ldots*}
+> \end{pmatrix}
 > $$
 >
 > There are $2^{n-1}$ such pairs, and the gate is applied to each pair in a loop.
