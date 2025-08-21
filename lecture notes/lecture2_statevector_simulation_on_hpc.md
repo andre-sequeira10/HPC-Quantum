@@ -297,7 +297,7 @@ If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have e
 | 7 | 48 | 32 |
 | 8 | 48 | 48 |
 
-<p><em>Table 2: Optimal thread count $T^*$ for 1- and 2-qubit gates on Deucalion's ARM node (48 cores).</em></p>
+<p><em> Table 2: Optimal thread count for 1- and 2-qubit gates on Deucalion's ARM node (48 cores).</em></p>
 </div>
 
 Beyond 8 qubits, we cannot usefully employ more than 48 threads on a single ARM node, because the number of independent chunks $W$ is larger than the number of threads available.
@@ -328,7 +328,7 @@ How can we schedule the number of threads on a single-node as a function of the 
 | 8 | 128 | 64 |
 | 9 | 128 | 128 |
 
-<p><em>Table 3: Optimal thread count \(T^*\) for 1- and 2-qubit gates on Deucalion's x86 node (128 cores).</em></p>
+<p><em>Table 3: Optimal thread count for 1- and 2-qubit gates on Deucalion's x86 node (128 cores).</em></p>
 </div>
 
 Beyond 9 qubits, we cannot usefully employ more than 128 threads on a single x86 node, because the number of independent chunks \(W\) is larger than the number of threads available.
