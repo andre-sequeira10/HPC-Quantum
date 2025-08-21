@@ -213,7 +213,7 @@ Apply to (0, 1):
 >
 > In general, applying a 1-qubit gate $U$ on the $q$-th qubit of an $n$-qubit state vector is represented as repetitive multiplications of the unitary matrix and two-element vectors of probability amplitudes whose indices differ in the $q$-th bit of their binary index:
 >
-> $$
+> ```math
 > \begin{pmatrix}
 > a'_{*\ldots*\,0_q\,*\ldots*} \\
 > a'_{*\ldots*\,1_q\,*\ldots*}
@@ -227,7 +227,7 @@ Apply to (0, 1):
 > a_{*\ldots*\,0_q\,*\ldots*} \\
 > a_{*\ldots*\,1_q\,*\ldots*}
 > \end{pmatrix}
-> $$
+> ```
 >
 > There are $2^{n-1}$ such pairs, and the gate is applied to each pair in a loop.
 > 
@@ -237,11 +237,7 @@ Apply to (0, 1):
 >\big(\alpha_{i_{00}},\,\alpha_{i_{01}},\,\alpha_{i_{10}},\,\alpha_{i_{11}}\big),
 >$$
 >
->There are exactly
->$
->\frac{2^n}{4}=2^{n-2}
->$
->such quadruples.
+>There are exactly $\frac{2^n}{4}=2^{n-2}$ such quadruples.
 >
 >*Intuition:* for 1-qubit gates you updated $2^{n-1}$ pairs via a $2\times2$ multiply; for 2-qubit gates you update $2^{n-2}$ quadruples via a $4\times4$ multiply.
 
