@@ -691,7 +691,7 @@ This SLURM script launches a **distributed** Qulacs run across **2 nodes** with 
 
 - `#SBATCH --ntasks=2`  
   Total MPI ranks = 2 (i.e., **1 rank per node**).   
-  > If you want more ranks per node, use `--ntasks=4`. In that case, you should also adjust `--cpus-per-task` accordingly. with Qulacs’ distributed state, more ranks ⇒ less state per rank. However, extra ranks increase communication volume/synchronization. Best split depends on the circuit and qubit distribution (communication-heavy gates may favor fewer ranks, more threads).
+  > If you want more ranks per node, you may set for instance `--ntasks=4`. In that case, you should also adjust `--cpus-per-task` accordingly. with Qulacs’ distributed state, more ranks ⇒ less state per rank. However, extra ranks increase communication volume/synchronization. Best split depends on the circuit and qubit distribution (communication-heavy gates may favor fewer ranks, more threads).
 
 ### 3.2 Grover's algorithm
 
