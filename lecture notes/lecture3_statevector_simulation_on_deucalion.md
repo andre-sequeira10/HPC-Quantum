@@ -514,6 +514,7 @@ Qulacs is a high-performance CPU-based statevector simulator optimized with Open
 from qulacs import QuantumCircuit, QuantumState
 import time 
 from argparse import ArgumentParser
+
 # ---- Args ----
 parser = ArgumentParser()
 parser.add_argument("--n_qubits", type=int, default=2, help="Number of qubits")
@@ -533,6 +534,7 @@ for i in range(1, n):
 #Update state and save time
 time_start = time.time()
 state = QuantumState(n)
+state.set_zero_state()
 circuit.update_quantum_state(state)
 time_end = time.time()
 
@@ -557,7 +559,7 @@ Then we create the following jobscript:
 ```bash
 #!/bin/bash
 #SBATCH --job-name=qulacs-ghz
-#SBATCH --account=i20240010a
+#SBATCH --account=<your account>
 #SBATCH --partition=normal-arm
 #SBATCH --time=00:30:00
 
@@ -598,6 +600,98 @@ How to run and fetch results
 3.	Monitor progress with `squeue --me`.
 4.	Outputs appear as ghz_<jobid>.out and ghz_<jobid>.err. For timings: `grep "Time taken to update state" ghz_*.out`
 5. To inspect a specific task `less ghz_<jobid>.out`
+
+
+>Now, let's imagine we want to simulate 31 qubits still on the `normal-arm` partition. From Table 3, a 31-qubit double-precision state requires 2 nodes. In this setting, Qulacs supports a distributed state vector off the shelf - we just need to change the way we initialize the quantum state. Now, `QuantumState(n, use_multi_cpu=True)` ensures the amplitudes are partitioned across processes/nodes. 
+>
+>For distributed quantum state vector simulation you have to make sure that Qulacs
+was built with Message Passing Interface ([MPI](https://www.open-mpi.org)) support, which is provided automatically on Deucalion by loading the module `module load qulacs`. 
+
+```python
+from mpi4py import MPI
+from qulacs import QuantumCircuit, QuantumState
+import time
+from argparse import ArgumentParser
+
+# MPI handles (no manual Init/Finalize needed)
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
+# ---- Args ----
+parser = ArgumentParser()
+parser.add_argument("--n_qubits", type=int, default=31)
+args = parser.parse_args()
+n = args.n_qubits
+
+# ---- Build GHZ_n: H(0) then CNOT(0->i) for i=1..n-1 ----
+circ = QuantumCircuit(n)
+circ.add_H_gate(0)
+for i in range(1, n):
+    circ.add_CNOT_gate(0, i)
+
+# ---- Distributed state across MPI ranks ----
+t0 = time.time()
+state = QuantumState(n, use_multi_cpu=True)
+circ.update_quantum_state(state)
+t1 = time.time()
+
+if rank == 0:
+    # Print a quick GHZ check instead of the full vector
+    p_all0 = state.get_probability([0]*n)
+    p_all1 = state.get_probability([1]*n)
+    print(f"[INFO] n={n}, ranks={size}, elapsed={t1 - t0:.3f}s")
+    print(f"[RESULT] P(|0…0>)={p_all0:.6f}, P(|1…1>)={p_all1:.6f}")
+```
+
+1. **Imports & MPI handles**
+   - `from mpi4py import MPI` gives access to `COMM_WORLD`, so we can obtain:
+     - `rank = comm.Get_rank()` (this process’ ID),
+     - `size = comm.Get_Size()` (total number of ranks).
+
+2. **Create a *distributed* quantum state**
+   - `state = QuantumState(n, use_multi_cpu=True)` tells Qulacs to **partition the statevector across ranks**.  
+     This is the only change required to enable multi-node/multi-rank simulation (assuming Qulacs was built with MPI).
+
+3. **Rank-0 summary output**
+   - Only `rank == 0` prints avoiding duplicate output.
+
+
+To execute the python script let us use the following jobscript:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=qulacs-ghz31
+#SBATCH --account=<your account>
+#SBATCH --partition=normal-arm
+#SBATCH --time=00:30:00
+
+#SBATCH --nodes=2
+#SBATCH --ntasks=2                 # 1 rank per node (distributed state)
+#SBATCH --cpus-per-task=48         # match cores per node
+#SBATCH --hint=nomultithread
+#SBATCH --exclusive
+#SBATCH --output=ghz31_%j.out
+#SBATCH --error=ghz31_%j.err
+
+module load qulacs
+
+# OpenMP pinning for each rank
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread   # try 'close' vs 'spread' and benchmark
+
+srun python ghz_multicpu.py --n_qubits=31
+```
+
+This SLURM script launches a **distributed** Qulacs run across **2 nodes** with **1 MPI rank per node**. Each rank uses **48 OpenMP threads**. Qulacs distributes the state when your Python creates it with `QuantumState(n, use_multi_cpu=True)`.
+
+- `#SBATCH --nodes=2`  
+  Reserve **2 nodes** (needed for the 31-qubit distributed example, per resource tables).
+
+- `#SBATCH --ntasks=2`  
+  Total MPI ranks = 2 (i.e., **1 rank per node**).   
+  > If you want more ranks per node, use `--ntasks=4`. In that case, you should also adjust `--cpus-per-task` accordingly. with Qulacs’ distributed state, more ranks ⇒ less state per rank. However, extra ranks increase communication volume/synchronization. Best split depends on the circuit and qubit distribution (communication-heavy gates may favor fewer ranks, more threads).
 
 ### 3.2 Grover's algorithm
 
