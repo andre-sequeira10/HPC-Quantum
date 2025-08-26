@@ -23,9 +23,12 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 time_end = time.time()
 
-print(f"statevector: {state.get_vector()}")
+#get probability of all zero state
+prob_zero = state.get_probability([0] * n)
+#get probability of all one state
+prob_one = state.get_probability([1] * n)
+
 print(f"Time taken to update state: {time_end - time_start:.6f} seconds")
-
-
-
+print(f"Probability of all zero state: {prob_zero:.6f}")
+print(f"Probability of all one state: {prob_one:.6f}")
 
