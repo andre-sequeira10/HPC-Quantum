@@ -1,68 +1,31 @@
-from qiskit import QuantumCircuit
-#from qiskit.providers.basic_provider import BasicSimulator
-#from qiskit.compiler import transpile, assemble
-from qiskit_aer import AerSimulator
-from mpi4py import MPI
+from qulacs import QuantumCircuit, QuantumState
+import time 
+from argparse import ArgumentParser
+# ---- Args ----
+parser = ArgumentParser()
+parser.add_argument("--n_qubits", type=int, default=1, help="Number of qubits")
+args = parser.parse_args()
 
-mpicomm = MPI.COMM_WORLD
-mpirank = mpicomm.Get_rank()
-mpisize = mpicomm.Get_size()
+# ---- Parameters ----
+n = args.n_qubits
 
-def create_ghz_circuit(n_qubits):
-    circuit = QuantumCircuit(n_qubits)
-    circuit.h(0)
-    for qubit in range(n_qubits - 1):
-        circuit.cx(qubit, qubit + 1)
-        circuit.cy(qubit, qubit +1)
-        circuit.cz(qubit, qubit+1)
-    for qubit in range(1,n_qubits-1):
-        circuit.cx(qubit,qubit-1)
-        circuit.cy(qubit,qubit-1)
-        circuit.cz(qubit,qubit-1)
-    return circuit
-
-shots = 10
-#depth=1000
-qubits = 31
-block_bits = 21
-#backend = BasicSimulator()
+# apply hadamard gate to first qubit
+circuit = QuantumCircuit(n)
+circuit.add_H_gate(0)
+for i in range(1, n):
+    # apply CNOT gate to all other qubits
+    circuit.add_CNOT_gate(0, i)
 
 
+#Update state and save time
+time_start = time.time()
+state = QuantumState(n)
+circuit.update_quantum_state(state)
+time_end = time.time()
 
-backend = AerSimulator(method = 'statevector')#, max_parallel_threads=48)
-#backend = QasmSimulator(method="statevector",max_parallel_threads=48)
-#circuit = transpile(create_ghz_circuit(qubits),backend = backend)
-circuit=create_ghz_circuit(qubits)
-circuit.measure_all()
+print(f"statevector: {state.get_vector()}")
+print(f"Time taken to update state: {time_end - time_start:.6f} seconds")
 
-#if mpirank == 0:
-#print("before")
-#circuit.save_statevector()
-#print("after")
 
-backend.set_options(
-    max_parallel_threads = 1,
-    max_parallel_experiments = 0,
-    max_parallel_shots = 1,
-    statevector_parallel_threshold = 16,
-    blocking_enable=True,
-    blocking_qubits=block_bits
-)
-#if mpirank == 0:
-    #print("resultou")
 
-result=backend.run(circuit,shots=shots).result()
-#if mpirank == 0:
-    #print("resultou 2")
 
-#result = backend.run(circuit, shots=shots, seed_simulator=10).result()
-#if mpirank == 0:
-print(result)
-
-#print("state vector ",result.get_statevector())
-print("state vector ",result.get_counts())
-adict = result.to_dict()
-meta = adict['metadata']
-print("meta: ", meta)
-myrank = meta['mpi_rank']
-print("myrank: ",myrank)
