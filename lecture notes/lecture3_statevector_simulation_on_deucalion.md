@@ -37,7 +37,7 @@ The main commands for using Slurm are summarized in the table below.
 | `scancel` | Signal or cancel jobs, job arrays or job steps            |
 | `sinfo`   | View information about nodes and partitions               |
 
-<p><em>Table 6: Common Slurm commands</em></p>
+<p><em>Table 1: Common Slurm commands</em></p>
 </div>
 
 ### 1.1 Create a batch script
