@@ -704,10 +704,10 @@ Grover’s algorithm is the canonical quantum routine for finding a marked item 
 Suppose we have $N=2^n$ basis states with bitstrings $x=x_1\ldots x_n$ and $M$ of them are marked as solutions.
 
 1) **Create the uniform superposition.**  
-  Start from \(|0\ldots 0\rangle\) and apply Hadamard gates to all \(n\) qubits:
+  Start from $|0\rangle^{\otimes n}$ and apply Hadamard gates to all qubits:
 
   $$
-  |s\rangle = (H^{\otimes n})\,|0\ldots 0\rangle
+  |s\rangle = H^{\otimes n}|0\ldots 0\rangle
   = \frac{1}{\sqrt{N}} \sum_{x\in\{0,1\}^n} |x\rangle .
   $$
 
@@ -715,10 +715,9 @@ Suppose we have $N=2^n$ basis states with bitstrings $x=x_1\ldots x_n$ and $M$ o
   The oracle \(U_w\) flips the phase of solution states and leaves others unchanged:
 
   $$
-  U_w = I - 2\!\!\sum_{w\in \text{solutions}}\! |w\rangle\langle w|,\qquad
+  U_w = I - 2\sum_{w\in \text{solutions}} |w\rangle\langle w|,\qquad
   U_w|x\rangle=\begin{cases}
-  -|x\rangle & x \text{ is a solution},\\
-  \;\;|x\rangle & \text{otherwise.}
+  -|x\rangle & x \text{ is a solution}\\|x\rangle & \text{otherwise.}
   \end{cases}
   $$
 
@@ -726,7 +725,7 @@ Suppose we have $N=2^n$ basis states with bitstrings $x=x_1\ldots x_n$ and $M$ o
   Reflect the state about the average amplitude using
 
   $$
-  U_s = 2\,|s\rangle\langle s| - I .
+  U_s = 2|s\rangle\langle s| - I
   $$
 
 3) **Grover iteration.**  
