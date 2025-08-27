@@ -748,44 +748,42 @@ In practice, the optimal number of iterations and probability associated with th
 Define the angle $\theta$ by
 
 $$
-\sin^2\theta=\frac{M}{N}\quad\Longleftrightarrow\quad \theta=\arcsin\sqrt{\frac{M}{N}} .
+\sin^2\theta=\frac{M}{N}\quad\Longleftrightarrow\quad \theta=\arcsin\sqrt{\frac{M}{N}}
 $$
 
-Starting from the uniform state $|s\rangle=\sin\theta\,|w\rangle+\cos\theta\,|w_\perp\rangle$, after $k$ Grover iterations the state is
+Starting from the uniform state $|s\rangle=\sin\theta|w\rangle+\cos\theta |w_\perp\rangle$ after $k$ Grover iterations the state is
 
 $$
-|\psi_k\rangle=\sin\big((2k+1)\theta\big)\,|w\rangle+\cos\big((2k+1)\theta\big)\,|w_\perp\rangle .
+|\psi_k\rangle=\sin\big((2k+1)\theta\big)|w\rangle+\cos\big((2k+1)\theta\big)|w_\perp\rangle
 $$
 
 Hence the **success probability** (total probability on all marked states) is
 
 $$
-P_k=\sin^2\big((2k+1)\theta\big).
+P_k=\sin^2\big((2k+1)\theta\big)
 $$
 
 To maximize $P_k$, we want the argument to be as close as possible to $\pi/2$:
 
 $$
 (2k+1)\theta \approx \frac{\pi}{2}\quad\Longrightarrow\quad
-k^\star \approx \frac{\pi}{4\theta}-\frac{1}{2}.
+k^\star \approx \frac{\pi}{4\theta}-\frac{1}{2}
 $$
 
 Because $k$ must be an integer, choose
 
 $$
-\boxed{\,k_{\mathrm{opt}}=\left\lfloor \frac{\pi}{4\theta}-\frac{1}{2}\right\rfloor\,}
-
+\boxed{\,k_{\mathrm{opt}}=\left\lfloor \frac{\pi}{4\theta}-\frac{1}{2}\right\rfloor}
 $$
 
 Assume $\theta = \arcsin\left(\sqrt{\frac{M}{N}}\right)$ and use $\arcsin(x) \approx x$ for $|x| \ll 1$ (i.e., $M \ll N$). Then
 
 $$
-\theta \approx \sqrt{\frac{M}{N}}, \qquad
+\theta \approx \sqrt{\frac{M}{N}} \qquad
 k_{\mathrm{opt}} \approx \frac{\pi}{4\theta} - \frac{1}{2}
 \;\approx\;
-\frac{\pi}{4}\sqrt{\frac{N}{M}} - \frac{1}{2}.
+\frac{\pi}{4}\sqrt{\frac{N}{M}} - \frac{1}{2}
 $$
-
 
 > That’s all: **prepare**, **phase-flip**, **diffuse**, **repeat**, **measure**. In the next subsection we’ll map these operators to gates and show a concrete Qulacs implementation suitable for Deucalion’s ARM and GPU nodes.
 #### 3.2.1 ARM job
