@@ -15,8 +15,10 @@
   - [3. Examples](#3-examples)
     - [3.1 Hello quantum world](#31-hello-quantum-world)
     - [3.2 Grover's algorithm](#32-grovers-algorithm)
+      - [3.2.1 ARM job](#321-arm-job)
+      - [3.2.2 GPU job](#322-gpu-job)
     - [3.3 Quantum Approximate Optimization Algorithm](#33-quantum-approximate-optimization-algorithm)
-  - [4. References](#4-references)
+  - [4. References and additional information](#4-references-and-additional-information)
 
 
 
@@ -695,8 +697,108 @@ This SLURM script launches a **distributed** Qulacs run across **2 nodes** with 
 
 ### 3.2 Grover's algorithm
 
+Grover’s algorithm is the canonical quantum routine for finding a marked item in an **unstructured** database. If a classical search needs $O(N)$ oracle queries to scan $N$ items, Grover promises $O(\sqrt{N})$ queries by repeatedly amplifying the probability of the correct answer. This results in a quadratic speedup. Once you can build the **oracle** for a given problem, the same speedup applies to many tasks (e.g., SAT-style search, or inverting a hash on a fixed domain).
+
+---
+
+Suppose we have $N=2^n$ basis states with bitstrings $x=x_1\ldots x_n$ and $M$ of them are marked as solutions.
+
+1) **Create the uniform superposition.**  
+  Start from \(|0\ldots 0\rangle\) and apply Hadamard gates to all \(n\) qubits:
+
+  $$
+  |s\rangle = (H^{\otimes n})\,|0\ldots 0\rangle
+  = \frac{1}{\sqrt{N}} \sum_{x\in\{0,1\}^n} |x\rangle .
+  $$
+
+1) **Oracle (phase flip the solutions).**  
+  The oracle \(U_w\) flips the phase of solution states and leaves others unchanged:
+
+  $$
+  U_w = I - 2\!\!\sum_{w\in \text{solutions}}\! |w\rangle\langle w|,\qquad
+  U_w|x\rangle=\begin{cases}
+  -|x\rangle & x \text{ is a solution},\\
+  \;\;|x\rangle & \text{otherwise.}
+  \end{cases}
+  $$
+
+2) **Diffusion (inversion about the mean and amplitude amplification).**  
+  Reflect the state about the average amplitude using
+
+  $$
+  U_s = 2\,|s\rangle\langle s| - I .
+  $$
+
+3) **Grover iteration.**  
+  Apply the pair $U_s U_w$ repeatedly. For
+  
+  $$
+  k \approx O\big(\sqrt{N/M}\big)
+  $$
+
+  iterations, the marked subspace has the highest probability amplitude.
+
+4) **Measure.**  
+  Measure in the computational basis. With high probability you obtain one of the marked bitstrings \(w\).
+
+--- 
+
+In practice, the optimal number of iterations and probability associated with the marked subspace can be estimated as follows: Let $N=2^n$ be the search space, $M$ the number of marked items. Let $|w\rangle$ and $|w_\perp\rangle$ be the uniform superpositions of the marked and unmarked states, respectively.
+
+Define the angle $\theta$ by
+
+$$
+\sin^2\theta=\frac{M}{N}\quad\Longleftrightarrow\quad \theta=\arcsin\sqrt{\frac{M}{N}} .
+$$
+
+Starting from the uniform state $|s\rangle=\sin\theta\,|w\rangle+\cos\theta\,|w_\perp\rangle$, after $k$ Grover iterations the state is
+
+$$
+|\psi_k\rangle=\sin\big((2k+1)\theta\big)\,|w\rangle+\cos\big((2k+1)\theta\big)\,|w_\perp\rangle .
+$$
+
+Hence the **success probability** (total probability on all marked states) is
+
+$$
+P_k=\sin^2\big((2k+1)\theta\big).
+$$
+
+To maximize $P_k$, we want the argument to be as close as possible to $\pi/2$:
+
+$$
+(2k+1)\theta \approx \frac{\pi}{2}\quad\Longrightarrow\quad
+k^\star \approx \frac{\pi}{4\theta}-\frac{1}{2}.
+$$
+
+Because $k$ must be an integer, choose
+
+$$
+\boxed{\,k_{\mathrm{opt}}=\left\lfloor \frac{\pi}{4\theta}-\frac{1}{2}\right\rfloor\,}
+
+$$
+
+Assume $\theta = \arcsin\left(\sqrt{\frac{M}{N}}\right)$ and use $\arcsin(x) \approx x$ for $|x| \ll 1$ (i.e., $M \ll N$). Then
+
+$$
+\theta \approx \sqrt{\frac{M}{N}}, \qquad
+k_{\mathrm{opt}} \approx \frac{\pi}{4\theta} - \frac{1}{2}
+\;\approx\;
+\frac{\pi}{4}\sqrt{\frac{N}{M}} - \frac{1}{2}.
+$$
+
+
+> That’s all: **prepare**, **phase-flip**, **diffuse**, **repeat**, **measure**. In the next subsection we’ll map these operators to gates and show a concrete Qulacs implementation suitable for Deucalion’s ARM and GPU nodes.
+#### 3.2.1 ARM job
+
+#### 3.2.2 GPU job 
+
 ### 3.3 Quantum Approximate Optimization Algorithm
 
 
-## 4. References 
-- [Y.Suzuki et.al Qulacs: a fast and versatile quantum circuit simulator for research purpose](https://arxiv.org/pdf/2011.13524)
+## 4. References and additional information
+<li><strong>Qulacs Official Documentation:</strong> <a href="https://qulacs.readthedocs.io/en/latest/">https://qulacs.readthedocs.io/en/latest/</a></li>
+<li><strong>Qulacs GitHub Repository:</strong> <a href="https://github.com/qulacs/qulacs">https://github.com/qulacs/qulacs</a></li>
+<li><strong>Deucalion User Support:</strong> <a href="mailto:deucalion@support.macc.fccn.pt">Deucalion support</a></li>
+<li><strong>Y.Suzuki et.al Qulacs: a fast and versatile quantum circuit simulator for research purpose:</strong> <a href="https://arxiv.org/pdf/2011.13524">https://arxiv.org/pdf/2011.13524</a></li>
+<li>M. A. Nielsen and I. L. Chuang, 6.1 The quantum search algorithm of “Quantum Computation and Quantum Information 10th Anniversary Edition“, University Printing House</li>
+<li><strong> Quantum Native Dojo:</strong> <a href="https://dojo.qulacs.org/en/latest/index.html">https://dojo.qulacs.org/en/latest/index.html</a></li>
