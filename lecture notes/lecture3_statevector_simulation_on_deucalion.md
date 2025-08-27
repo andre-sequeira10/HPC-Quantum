@@ -714,12 +714,17 @@ Suppose we have $N=2^n$ basis states with bitstrings $x=x_1\ldots x_n$ and $M$ o
 1) **Oracle (phase flip the solutions).**  
   The oracle \(U_w\) flips the phase of solution states and leaves others unchanged:
 
-  $$
-  U_w = I - 2\sum_{w\in \text{solutions}} |w\rangle\langle w|,\qquad
-  U_w|x\rangle=\begin{cases}
-  -|x\rangle & x \text{ is a solution}\\|x\rangle & \text{otherwise.}
-  \end{cases}
-  $$
+$$
+U_w = I - 2 \sum_{w \in \text{solutions}} |w\rangle \langle w|
+$$
+
+$$
+U_w|x\rangle =
+\begin{cases}
+-|x\rangle, & \text{if } x \text{ is a solution},\\
+\;\;|x\rangle, & \text{otherwise.}
+\end{cases}
+$$
 
 2) **Diffusion (inversion about the mean and amplitude amplification).**  
   Reflect the state about the average amplitude using
@@ -772,7 +777,7 @@ $$
 Because $k$ must be an integer, choose
 
 $$
-\boxed{\,k_{\mathrm{opt}}=\left\lfloor \frac{\pi}{4\theta}-\frac{1}{2}\right\rfloor}
+\boxed{k_{\mathrm{opt}}=\left\lfloor \frac{\pi}{4\theta}-\frac{1}{2}\right\rfloor}
 $$
 
 Assume $\theta = \arcsin\left(\sqrt{\frac{M}{N}}\right)$ and use $\arcsin(x) \approx x$ for $|x| \ll 1$ (i.e., $M \ll N$). Then
@@ -780,7 +785,7 @@ Assume $\theta = \arcsin\left(\sqrt{\frac{M}{N}}\right)$ and use $\arcsin(x) \ap
 $$
 \theta \approx \sqrt{\frac{M}{N}} \qquad
 k_{\mathrm{opt}} \approx \frac{\pi}{4\theta} - \frac{1}{2}
-\;\approx\;
+\approx
 \frac{\pi}{4}\sqrt{\frac{N}{M}} - \frac{1}{2}
 $$
 
