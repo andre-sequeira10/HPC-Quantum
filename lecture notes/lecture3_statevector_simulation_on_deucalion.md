@@ -722,7 +722,7 @@ $$
 U_w|x\rangle =
 \begin{cases}
 -|x\rangle, & \text{if } x \text{ is a solution},\\
-\;\;|x\rangle, & \text{otherwise.}
+|x\rangle, & \text{otherwise.}
 \end{cases}
 $$
 
