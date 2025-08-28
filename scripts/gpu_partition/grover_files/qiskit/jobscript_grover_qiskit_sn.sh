@@ -32,4 +32,3 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 /usr/bin/time -f "elapsed=%E cpu=%P maxrss=%MKB" \
               -o time_${SLURM_ARRAY_TASK_ID}_${SLURM_JOB_ID}.txt \
     srun python grover_qiskit_sn.py --n_qubits ${SLURM_ARRAY_TASK_ID}
-kokkos-4.6.02.tar.gz

@@ -17,7 +17,8 @@
     - [3.2 Grover's algorithm](#32-grovers-algorithm)
       - [3.2.1 ARM job](#321-arm-job)
       - [3.2.2 GPU job](#322-gpu-job)
-    - [3.3 Quantum Approximate Optimization Algorithm](#33-quantum-approximate-optimization-algorithm)
+    - [3.3 Quantum Approximate Optimization Algorithm (QAOA)](#33-quantum-approximate-optimization-algorithm-qaoa)
+      - [Example: Max-Cut (4-node ring)](#example-max-cut-4-node-ring)
   - [4. References and additional information](#4-references-and-additional-information)
 
 
@@ -790,11 +791,314 @@ k_{\mathrm{opt}} \approx \frac{\pi}{4\theta} - \frac{1}{2}
 $$
 
 > That’s all: **prepare**, **phase-flip**, **diffuse**, **repeat**, **measure**. In the next subsection we’ll map these operators to gates and show a concrete Qulacs implementation suitable for Deucalion’s ARM and GPU nodes.
+
+---
+
+Below we decompose the script into the three core building blocks of Grover’s algorithm—**superposition**, **oracle**, and **diffuser**—and explain how each is implemented in Qulacs. In Sections 3.2.1 and 3.2.2 we will discuss the ARM and GPU implementations, respectively.
+
+
+Allocate an $n$-qubit **state vector** and turn $|0\rangle^n$ into the uniform superposition by applying a Hadamard to each qubit.
+
+```python
+# Allocate the (optionally distributed) state
+state = QuantumState(n_qubits, use_multi_cpu=True)
+state.set_zero_state()  # |0...0>
+
+# Build H^{⊗n} to create |s>
+def make_Hadamard(nqubits):
+    Hadamard = QuantumCircuit(nqubits)
+    for i in range(nqubits):
+        Hadamard.add_gate(H(i))
+    return Hadamard
+
+Hadamard = make_Hadamard(n_qubits)
+Hadamard.update_quantum_state(state)  # state := |s>
+```
+
+>Note: If you run with one rank (--ntasks=1), use_multi_cpu=True simply doesn’t distribute anything (it behaves like the regular state) and threading is still governed by OpenMP.
+
+For the oracle the logic is to apply a global phase (-1) only to the target basis state ($|w\rangle$). The common trick is to map the target to $|11\ldots1\rangle$, apply a multi-controlled Z that flips the phase of $|11\ldots1\rangle$, then undo the mapping.
+
+```python
+def Oracle(nqubits, target_state=None):
+    U_w = QuantumCircuit(nqubits)
+
+    # 1) Pre-process: X on positions where target bit == 0
+    #    This maps the marked string -> all-ones mask.
+    for i in range(nqubits):
+        if target_state[i] == 0:
+            U_w.add_gate(X(i))
+
+    # 2) Multi-controlled Z on the last qubit, controlled on all others being 1
+    CnZ = to_matrix_gate(Z(nqubits-1))
+    for i in range(nqubits-1):
+        CnZ.add_control_qubit(control_index=i, control_with_value=1)
+    U_w.add_gate(CnZ)
+
+    # 3) Undo the pre-processing X gates
+    for i in range(nqubits):
+        if target_state[i] == 0:
+            U_w.add_gate(X(i))
+
+    return U_w
+``` 
+Step (1) turns the specific $|w\rangle$ into $|11\ldots1\rangle$. Step (2) applies a phase flip only when all controls are 1, i.e., on $|11\ldots1\rangle$. Step (3) restores the original computational basis, so only $|w\rangle$ carries the (-1) phase.
+
+The diffuser is expressed by the operator $U_s = 2|s\rangle\langle s| - I$. The standard circuit that realizes it is 
+
+$$
+U_s = H^{\otimes n}\big(2|0\rangle\langle 0| - I\big)H^{\otimes n}.
+$$
+
+The middle term $(2|0\rangle\langle0| - I)$  is a selective phase flip of the all-zero state.
+
+```python
+def Diffuser(nqubits):
+    U_s = QuantumCircuit(nqubits)
+
+    # Enter Hadamard basis: |ψ> -> H^{⊗n}|ψ>
+    for i in range(nqubits):
+        U_s.add_gate(H(i))
+
+    # Implement (2|0><0| - I):
+    # - RZ(2π) on the last qubit gives a global -I (phase -1 to all states)
+    U_s.add_gate(to_matrix_gate(RZ(nqubits-1, 2*np.pi)))
+
+    # - Toggle the last qubit with X so a subsequent controlled-Z can key off "all controls = 0"
+    U_s.add_gate(X(nqubits-1))
+
+    # - Multi-controlled Z acting only when controls are |0> (i.e., on |0...0>)
+    CnZ = to_matrix_gate(Z(nqubits-1))
+    for i in range(nqubits-1):
+        CnZ.add_control_qubit(control_index=i, control_with_value=0)
+    U_s.add_gate(CnZ)
+
+    # - Undo the X toggle on the last qubit
+    U_s.add_gate(X(nqubits-1))
+
+    # Leave Hadamard basis: apply H^{⊗n} again
+    for i in range(nqubits):
+        U_s.add_gate(H(i))
+
+    return U_s
+
+```
+
+Now, Grover's algorithm repeats the oracle and diffuser for the optimal number of steps calculated previously. To that end, we first need to define the target state to find. In this case is the all ones bitstring. 
+
+```python
+# Mark the all-ones string
+marked_state = [1] * n_qubits
+U_w = Oracle(n_qubits, target_state=marked_state)
+U_s = Diffuser(n_qubits)
+
+# Ideal iteration count ~ floor((π/4)*sqrt(N/M)); here M=1
+elements = 1
+optimal_iterations = int(np.floor(np.pi/4 * np.sqrt(2**n_qubits / elements)))
+
+# Demo: run 2 Grover iterations (use optimal_iterations for best success prob.)
+for i in range(2):
+    U_w.update_quantum_state(state)
+    U_s.update_quantum_state(state)
+
+# Inspect the final amplitudes (magnitude only)
+statevector = abs(state.get_vector())
+print("statevector: ", statevector)
+```
+
+Additionally you can use `qulacsviz`to visualize the Grover circuit.
+
+```python
+def build_grover_circuit(n_qubits, iterations, oracle_circuit, diffuser_circuit, hadamard_circuit):
+    grover_circuit = QuantumCircuit(n_qubits)
+
+    grover_circuit.merge_circuit(hadamard_circuit)
+
+    for _ in range(iterations):
+        grover_circuit.merge_circuit(oracle_circuit)
+        grover_circuit.merge_circuit(diffuser_circuit)
+    return grover_circuit
+
+grover_circuit = build_grover_circuit(
+    n_qubits=n_qubits,
+    iterations=2,
+    oracle_circuit=U_w,
+    diffuser_circuit=U_s,
+    hadamard_circuit=Hadamard
+)
+
+
+circuit_drawer(grover_circuit, 'mpl')
+```
+
+That for two Grover iterations would result in the circuit depicted in Figure 1. 
+
+<div align="center">
+
+<img src="images/grover2.png" alt="Grover's algorithm circuit for 2 iterations" width="600"/>
+
+<p><em>Figure 1: Grover's algorithm circuit for 2 iterations, visualized with qulacsviz.</em></p>
+
+</div>
+
 #### 3.2.1 ARM job
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=qulacs-grover
+#SBATCH --account=<your account>
+#SBATCH --partition=normal-arm
+#SBATCH --time=00:30:00
+
+#SBATCH --nodes=32
+#SBATCH --ntasks=32                 
+#SBATCH --cpus-per-task=48   
+#SBATCH --exclusive
+#SBATCH --output=grover_%j.out
+#SBATCH --error=grover_%j.err
+
+module load qulacs
+
+# OpenMP pinning for each rank
+export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+export OMP_PLACES=cores
+export OMP_PROC_BIND=spread
+
+srun python grover_multicpu.py --n_qubits=31
+```
+The jobscript above requests 32 nodes and 32 `--ntasks`. From Table 3 using the `normal-arm` partition we would be able to simulate Grover's algorithm up to a maximum of 35 qubits. Test it yourself using the Grover scripts in `scripts/arm_partition/grover`.
 
 #### 3.2.2 GPU job 
 
-### 3.3 Quantum Approximate Optimization Algorithm
+```bash 
+#!/bin/bash
+#SBATCH --job-name=Grover_GPU
+#SBATCH --account=<your account>
+#SBATCH --partition=normal-a100-40
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=32
+#SBATCH --time=24:00:00
+#SBATCH --mem=0
+#SBATCH --array=28,30
+#SBATCH -o grover_gpu_%a_%j.out 
+#SBATCH -e grover_gpu_%a_%j.err
+
+# Load environment
+ml qulacs/0.6.11-foss-2023a-CUDA-12.1.1
+
+srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
+```
+
+This example uses the **GPU-enabled Qulacs module** (`ml qulacs/0.6.11-foss-2023a-CUDA-12.1.1`) rather than the CPU-only build. When running on GPU, your Python code must construct the state with **`QuantumStateGpu`** (not `QuantumState`), e.g.
+
+```python
+from qulacs import QuantumCircuit, QuantumStateGpu
+state = QuantumStateGpu(n_qubits)      # GPU-backed state vector
+# ... build circuit, then:
+circuit.update_quantum_state(state)
+```
+
+The resource request pairs --gpus=1 with --cpus-per-task=32, a sensible default on normal-a100-40 (see Section 1).
+
+⚠️ Note: As of now, Qulacs does not support a single distributed state vector across multiple GPUs. If you need multi-GPU distribution, you should use a different framework (e.g., nvidia CuQuantum or PennyLane / Qiskit that support easy access to multi-GPU simulation using nvidia CuQuantum as backend). See the provided examples under `scripts/gpu_partition/`.
+
+
+### 3.3 Quantum Approximate Optimization Algorithm (QAOA)
+
+QAOA is a variational, gate-based algorithm designed for **combinatorial optimization** on near-term (NISQ) devices. Much like quantum annealing, it searches for bitstrings that minimize a classical objective, but it does so with a **parameterized circuit** whose angles are tuned by a classical optimizer.
+
+---
+
+Let $z=z_1 z_2 \cdots z_n$ be an $n$-bit string (with $z_i\in\{0,1\}$, or equivalently $s_i=(-1)^{z_i}\in\{\pm1\}$). We aim to minimize a cost
+
+$$
+C(z)=\sum_\alpha C_\alpha(z),
+$$
+
+where each term $C_\alpha$ is local (e.g., Ising-like couplings such as $s_i s_j$). To “quantize” the problem, replace the classical variables by Pauli operators and obtain a **cost Hamiltonian**
+
+$$
+C(Z)\ \equiv\ C(Z_1,\ldots,Z_n),
+$$
+
+so that eigenvalues of $C(Z)$ correspond to classical costs $C(z)$.
+
+---
+
+QAOA uses $p$ layers of two unitaries—one from the cost and one from a simple mixing Hamiltonian—applied to a uniform superposition:
+$$
+|s\rangle = |+\rangle^{\otimes n} = \frac{1}{2^{n/2}}\sum_{z=0}^{2^n-1}|z\rangle,
+$$
+
+$$
+|\beta,\gamma\rangle \;=\; U_X(\beta^{(p)})\,U_C(\gamma^{(p)})\cdots U_X(\beta^{(1)})\,U_C(\gamma^{(1)})\,|s\rangle,
+$$
+
+with parameters $\beta=(\beta^{(1)},\ldots,\beta^{(p)})$ and $\gamma=(\gamma^{(1)},\ldots,\gamma^{(p)})$. The layer unitaries are
+
+$$
+U_C(\gamma^{(i)})=\exp\!\big(-i\,\gamma^{(i)}\,C(Z)\big)
+=\prod_\alpha \exp\!\big(-i\,\gamma^{(i)}\,C_\alpha(Z)\big),
+$$
+
+$$
+U_X(\beta^{(i)})=\exp\!\Big(-i\,\beta^{(i)}\sum_{j=1}^n X_j\Big)
+=\prod_{j=1}^n \exp\!\big(-i\,\beta^{(i)} X_j\big).
+$$
+
+Intuitively, $U_C$ **imprints** problem structure via phase kicks, while $U_X$ **mixes** amplitudes across bitstrings.
+
+---
+
+Given $|\beta,\gamma\rangle$, define the variational objective
+
+$$
+F(\beta,\gamma)=\langle \beta,\gamma|\,C(Z)\,|\beta,\gamma\rangle.
+$$
+
+
+A classical optimizer updates $(\beta,\gamma)$ to **minimize** $F$. The hybrid loop is:
+
+1. Prepare $|s\rangle=|+\rangle^{\otimes n}$.
+2. Apply $p$ layers $U_C(\gamma^{(i)})$ and $U_X(\beta^{(i)})$ to obtain $|\beta,\gamma\rangle$.
+3. Estimate $F(\beta,\gamma)$ (via repeated measurements/expectations).
+4. Classically update $(\beta,\gamma)$ to reduce $F$.
+5. Repeat steps 1–4 until convergence, producing $(\beta^*,\gamma^*)$.
+6. Sample $|\beta^*,\gamma^*\rangle$; take high-probability bitstrings as candidate solutions.
+
+---
+
+#### Example: Max-Cut (4-node ring)
+For a graph $G=(V,E)$, Max-Cut seeks a bipartition that **maximizes** the number of edges crossing the cut. Using the $\pm1$ spin convention $s_i=(-1)^{z_i}$, a standard cost is
+
+$$
+C(z) \;=\; -\frac{1}{2}\sum_{(i,j)\in E}\big(1 - s_i s_j\big)
+\quad\Longleftrightarrow\quad
+C(Z)\;=\;\frac{1}{2}\sum_{(i,j)\in E} Z_i Z_j \;+\; \text{(constant)}.
+$$
+
+For the 4-vertex cycle, $E=\{(0,1),(1,2),(2,3),(3,0)\}$, so (dropping constants)
+
+$$
+C(Z) \;=\; \frac{1}{2}\,\big(Z_0 Z_1+Z_1 Z_2+Z_2 Z_3+Z_3 Z_0\big).
+$$
+
+**Implementation hint.** Each two-qubit phase $\exp(-i\,\gamma\,Z_i Z_j)$ can be compiled with a **CNOT–RZ–CNOT** pattern:
+
+$$
+e^{-i\,\gamma\,Z_i Z_j}
+\;=\;
+\mathrm{CNOT}_{i\to j}\;\cdot\; e^{-i\,\gamma\,Z_j}\;\cdot\;\mathrm{CNOT}_{i\to j}.
+$$
+
+---
+
+- With **$p=1$** (one layer), the ansatz may not be expressive enough to place all probability on optimal cuts, but it often **biases** the outcome toward good solutions.
+- Increasing to **$p=2$** (or higher) typically sharpens the distribution around optimal bitstrings and lowers the expected cost $F$, at the expense of more gates and a larger classical search space over $(\beta,\gamma)$.
+
+---
 
 
 ## 4. References and additional information
@@ -804,3 +1108,4 @@ $$
 <li><strong>Y.Suzuki et.al Qulacs: a fast and versatile quantum circuit simulator for research purpose:</strong> <a href="https://arxiv.org/pdf/2011.13524">https://arxiv.org/pdf/2011.13524</a></li>
 <li>M. A. Nielsen and I. L. Chuang, 6.1 The quantum search algorithm of “Quantum Computation and Quantum Information 10th Anniversary Edition“, University Printing House</li>
 <li><strong> Quantum Native Dojo:</strong> <a href="https://dojo.qulacs.org/en/latest/index.html">https://dojo.qulacs.org/en/latest/index.html</a></li>
+<li><strong>A Quantum Approximate Optimization Algorithm:</strong> E. Farhi, J. Goldstone, S. Gutmann, arXiv:1411.4028 (2014).</li>

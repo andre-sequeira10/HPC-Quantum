@@ -1,2 +1,0 @@
-Command exited with non-zero status 1
-elapsed=0:50.05 cpu=39% maxrss=489216KB

@@ -27,16 +27,11 @@ from qulacs.gate import RX,RY,RZ #Rotation operations on Pauli operators
 from argparse import ArgumentParser
 # ---- Args ----
 parser = ArgumentParser()
-parser.add_argument("--n_qubits", type=int, default=1, help="Number of qubits")
+parser.add_argument("--n_qubits", type=int, default=2, help="Number of qubits")
 args = parser.parse_args()
 
 # ---- Parameters ----
 n_qubits = args.n_qubits
-
-
-def show_distribution(state,nqubits):
-    plt.bar([i for i in range(pow(2,nqubits))], abs(state.get_vector()))
-    plt.show()
 
 def Oracle(nqubits, target_state=None):
     U_w = QuantumCircuit(nqubits)
@@ -84,12 +79,6 @@ def Diffuser(nqubits):
 
     return U_s
 
-
-#n_qubits = 10
-
-#target_state = QuantumState(n_qubits, use_multi_cpu=True)
-#target_state.set_computational_basis(2**n_qubits-1)
-
 ## Run Grover's algorithm
 state = QuantumState(n_qubits, use_multi_cpu=True)
 state.set_zero_state()
@@ -119,12 +108,6 @@ for i in range(300):
 
 #show_distribution(state,n_qubits)
 
-probs = abs(state.get_vector())
-print("Probabilities: ", probs)
+statevector = abs(state.get_vector())
+print("statevector: ", statevector)
 
-#test Oracle with an empty circuit
-
-#circuit = QuantumCircuit(n_qubits)
-#circuit.merge_circuit(U_w)
-
-#circuit_drawer(circuit)
