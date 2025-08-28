@@ -1086,9 +1086,7 @@ $$
 **Implementation hint.** Each two-qubit phase $\exp(-i\,\gamma\,Z_i Z_j)$ can be compiled with a **CNOT–RZ–CNOT** pattern:
 
 $$
-e^{-i\,\gamma\,Z_i Z_j}
-\;=\;
-\mathrm{CNOT}_{i\to j}\;\cdot\; e^{-i\,\gamma\,Z_j}\;\cdot\;\mathrm{CNOT}_{i\to j}.
+e^{-i \gamma Z_i Z_j} = \mathrm{CNOT}_{i\to j}\;\cdot\; e^{-i \gamma Z_j}\;\cdot\;\mathrm{CNOT}_{i\to j}.
 $$
 
 ---
