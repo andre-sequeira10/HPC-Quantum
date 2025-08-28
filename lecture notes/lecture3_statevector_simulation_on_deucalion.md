@@ -1251,6 +1251,15 @@ Optional micro-improvements:
 - For small n, brute-force the exact Max-Cut to compare against your best sampled bitstring.
 - If you’ll scale up, switch from printing the full probability vector to sampling (e.g., state.sampling(K)), then compute cut values for the samples.
 
+You can visualize QAOA's quantum circuit using `qulacsviz` same as in Grover's algorithm (See Section 3.2)
+
+<div align="center">
+
+<img src="images/qaoa_circuit_p2_n6.png" alt="QAOA circuit for Max-Cut" width="800"/>
+
+<p><em>Figure 2: QAOA quantum circuit in Qualacs for Max-Cut on a random graph with two layers, visualized with qulacsviz.</em></p>
+
+</div>
 
 Now, we can execute QAOA algorithm on Deucalion using the follwing jobscript:
 
