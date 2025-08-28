@@ -14,18 +14,12 @@
 
 
 # Load environment
-#source /share/env/module_select.sh
 ml qulacs/0.6.11-foss-2024a-mem
-#source /projects/I20240010/qulacs_python/venv/bin/activate
 
 # Set OpenMP environment variables
 export OMP_NUM_THREADS=48
-
-#python grover_example.py --n_qubits 10
-#srun --mpi=pmi2 python grover_example.py --n_qubits 10
-#srun python grover_example.py --n_qubits 10
-#mpirun -np 1 python grover_example.py --n_qubits 10
-
+export OMP_PROC_BIND=spread
+export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
 # SLURM_ARRAY_TASK_ID takes the value 20 / 22 / … / 30 for each task

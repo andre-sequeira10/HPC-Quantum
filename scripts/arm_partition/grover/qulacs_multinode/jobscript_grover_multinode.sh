@@ -21,6 +21,8 @@ ml qulacs/0.6.11-foss-2024a-mem
 
 # Set OpenMP environment variables
 export OMP_NUM_THREADS=48
+export OMP_PROC_BIND=spread
+export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
 # SLURM_ARRAY_TASK_ID takes the value 20 / 22 / … / 30 for each task

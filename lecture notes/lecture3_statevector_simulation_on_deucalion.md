@@ -18,7 +18,6 @@
       - [3.2.1 ARM job](#321-arm-job)
       - [3.2.2 GPU job](#322-gpu-job)
     - [3.3 Quantum Approximate Optimization Algorithm (QAOA)](#33-quantum-approximate-optimization-algorithm-qaoa)
-      - [Example: Max-Cut (4-node ring)](#example-max-cut-4-node-ring)
   - [4. References and additional information](#4-references-and-additional-information)
 
 
@@ -1007,23 +1006,23 @@ The resource request pairs --gpus=1 with --cpus-per-task=32, a sensible default 
 
 ### 3.3 Quantum Approximate Optimization Algorithm (QAOA)
 
-QAOA is a variational, gate-based algorithm designed for **combinatorial optimization** on near-term (NISQ) devices. Much like quantum annealing, it searches for bitstrings that minimize a classical objective, but it does so with a **parameterized circuit** whose angles are tuned by a classical optimizer.
+QAOA is a variational, gate-based algorithm designed for **combinatorial optimization** on near-term (NISQ) devices. Much like quantum annealing, it searches for bitstrings that minimize a classical objective, but it does so with a **parameterized circuit** whose angles are tuned by a classical optimizer. 
+
+QAOA with **constant depth** realizes shallow quantum circuits whose output distributions are, under widely held complexity-theoretic assumptions (e.g., non-collapse of the polynomial hierarchy), **believed to be classically hard to sample** from even approximately. Intuitively, the circuit creates global interference patterns tied to the problem structure; reproducing these correlations with a classical sampler would imply unlikely collapses in complexity classes.
+
+ Practically, this places QAOA in a sweet spot: shallow enough for present hardware, yet rich enough to produce distributions that classical methods are not expected to sample from efficiently—while still allowing **efficient estimation** of the objective by repeated measurements, enabling the hybrid optimization loop.
 
 ---
 
-Let $z=z_1 z_2 \cdots z_n$ be an $n$-bit string (with $z_i\in\{0,1\}$, or equivalently $s_i=(-1)^{z_i}\in\{\pm1\}$). We aim to minimize a cost
+In QAOA, we start with a classical optimization problem defined over $n$-bit strings $z = z_1 z_2 \cdots z_n$, where each $z_i \in \{0,1\}$. The goal is to find a bitstring $z$ that minimizes a given **cost function** $C(z)$. This cost function is typically a sum of local terms:
 
 $$
-C(z)=\sum_\alpha C_\alpha(z),
+C(z) = \sum_\alpha C_\alpha(z),
 $$
 
-where each term $C_\alpha$ is local (e.g., Ising-like couplings such as $s_i s_j$). To “quantize” the problem, replace the classical variables by Pauli operators and obtain a **cost Hamiltonian**
+where each $C_\alpha(z)$ depends only on a small subset of the bits, for example, pairwise interactions like $z_i z_j$.
 
-$$
-C(Z)\ \equiv\ C(Z_1,\ldots,Z_n),
-$$
-
-so that eigenvalues of $C(Z)$ correspond to classical costs $C(z)$.
+To use QAOA, we map this classical cost function to a **quantum cost Hamiltonian** $C(Z)$ by promoting each classical bit $z_i$ to a spin $s_i = (-1)^{z_i}$ and creating quantum operators $Z_i$ (the Pauli-Z operator acting on qubit $i$). The eigenvalues of $C(Z)$ correspond exactly to the classical costs $C(z)$ for each computational basis state $|z\rangle$.
 
 ---
 
@@ -1048,7 +1047,7 @@ U_X(\beta^{(i)})=\exp\!\Big(-i\,\beta^{(i)}\sum_{j=1}^n X_j\Big)
 =\prod_{j=1}^n \exp\!\big(-i\,\beta^{(i)} X_j\big).
 $$
 
-Intuitively, $U_C$ **imprints** problem structure via phase kicks, while $U_X$ **mixes** amplitudes across bitstrings.
+Intuitively, $U_C$ **imprints** problem structure, while $U_X$ **mixes** amplitudes across bitstrings.
 
 ---
 
@@ -1070,7 +1069,6 @@ A classical optimizer updates $(\beta,\gamma)$ to **minimize** $F$. The hybrid l
 
 ---
 
-#### Example: Max-Cut (4-node ring)
 For a graph $G=(V,E)$, Max-Cut seeks a bipartition that **maximizes** the number of edges crossing the cut. Using the $\pm1$ spin convention $s_i=(-1)^{z_i}$, a standard cost is
 
 $$
@@ -1097,10 +1095,200 @@ $$
 
 - With **$p=1$** (one layer), the ansatz may not be expressive enough to place all probability on optimal cuts, but it often **biases** the outcome toward good solutions.
 - Increasing to **$p=2$** (or higher) typically sharpens the distribution around optimal bitstrings and lowers the expected cost $F$, at the expense of more gates and a larger classical search space over $(\beta,\gamma)$.
-
+- Many QAOA targets (Max-Cut, SAT, etc.) are NP-hard. Even a fault-tolerant quantum computer isn’t expected to solve NP-hard problems in polynomial time. QAOA of polynomial depth is universal for quantum computation, but that doesn’t imply polynomial-time optimal solutions to NP-hard problems. 
+  
 ---
 
 
+Ok now let's implement the QAOA circuit for the Max-Cut problem. Let's draw an (n)-vertex random graph and attach integer weights $w_{ij}\in[\text{low},\text{high}]$ to each edge. This induces the Max-Cut objective: split vertices into two sets to maximize the sum of weights of cut edges.
+
+```python
+obs = Observable(n)
+obs.add_operator(PauliOperator(f"Z {i} Z {j}", 0.5 * w))
+```
+
+We encode (up to an additive constant) the Max-Cut cost as
+$$
+C(Z)=\tfrac12 \sum_{(i,j)\in E} w_{ij} Z_i Z_j.
+$$
+In Qulacs, an Observable holds a weighted sum of Pauli terms; later we compute $\langle C(Z)\rangle$ directly from the state.
+
+
+```python 
+from qulacs import QuantumState, QuantumCircuit, Observable, PauliOperator
+from qulacs.gate import H, CNOT, RX, RZ
+from scipy.optimize import minimize
+import numpy as np
+
+import networkx as nx
+import random
+
+
+
+from argparse import ArgumentParser
+# ---- Args ----
+parser = ArgumentParser()
+parser.add_argument("--n_qubits", type=int, default=4, help="Number of qubits")
+parser.add_argument("--n_layers", type=int, default=2, help="Number of QAOA layers")
+args = parser.parse_args()
+
+# ---- Parameters ----
+n = args.n_qubits       # number of qubits / graph vertices
+p = args.n_layers       # QAOA depth (number of layers)
+
+
+#!/usr/bin/env python3
+"""
+QAOA for weighted Max-Cut in Qulacs (general depth p)
+No command-line arguments; edit the variables below.
+"""
+
+
+# =========================
+# User-configurable settings that can be made as arguments as well !!! 
+# =========================
+edge_prob = 0.3          # Erdos–Renyi edge probability
+seed = 123               # RNG seed for graph & weights
+maxiter = 300            # optimizer iterations
+use_multi_cpu = False    # set True if running with MPI-enabled Qulacs (multi-rank)
+weights_low, weights_high = 1, 10  # integer edge weights in [low, high]
+# =========================
+
+# ---- Build random weighted graph ----
+rng = np.random.default_rng(seed)
+G = nx.erdos_renyi_graph(n, p=edge_prob, seed=seed)
+for (i, j) in G.edges():
+    G.edges[i, j]["weight"] = int(rng.integers(weights_low, weights_high + 1))
+
+# ---- Cost observable: C(Z) = 0.5 * sum_{(i,j) in E} w_ij Z_i Z_j ----
+def cost_observable_from_graph(G, n):
+    obs = Observable(n)
+    for (i, j, data) in G.edges(data=True):
+        w = float(data["weight"])
+        obs.add_operator(PauliOperator(f"Z {i} Z {j}", 0.5 * w))
+    return obs
+
+cost_observable = cost_observable_from_graph(G, n)
+
+# ---- QAOA layers ----
+# U_C(gamma): for each edge (i,j) with weight w,
+#   CNOT(i->j) ; RZ(j, -2*w*gamma) ; CNOT(i->j)
+def add_U_C(circuit: QuantumCircuit, gamma: float, G) -> QuantumCircuit:
+    for (i, j, data) in G.edges(data=True):
+        w = float(data["weight"])
+        circuit.add_CNOT_gate(i, j)
+        circuit.add_gate(RZ(j, -2.0 * w * gamma))  # RZ(theta) = exp(-i*theta/2 Z)
+        circuit.add_CNOT_gate(i, j)
+    return circuit
+
+# U_X(beta): RX(q, -2*beta) on every qubit
+def add_U_X(circuit: QuantumCircuit, beta: float, n: int) -> QuantumCircuit:
+    for q in range(n):
+        circuit.add_gate(RX(q, -2.0 * beta))       # RX(theta) = exp(-i*theta/2 X)
+    return circuit
+
+# ---- Build p-layer QAOA circuit ----
+def build_qaoa_circuit(n: int, G, betas, gammas) -> QuantumCircuit:
+    assert len(betas) == len(gammas) == p
+    circuit = QuantumCircuit(n)
+    # Prepare |s> = |+>^{⊗n}
+    for q in range(n):
+        circuit.add_H_gate(q)
+    # Apply layers: U_C(gamma_l) then U_X(beta_l)
+    for l in range(p):
+        add_U_C(circuit, gammas[l], G)
+        add_U_X(circuit, betas[l], n)
+    return circuit
+
+# ---- Expectation of C(Z) for parameters x = [betas..., gammas...] ----
+def qaoa_expectation(x: np.ndarray) -> float:
+    betas = x[:p]
+    gammas = x[p:]
+    circ = build_qaoa_circuit(n, G, betas, gammas)
+    state = QuantumState(n, use_multi_cpu=use_multi_cpu)
+    state.set_zero_state()
+    circ.update_quantum_state(state)
+    return cost_observable.get_expectation_value(state)
+
+# ---- Optimize parameters ----
+x0 = np.concatenate([0.1 * np.ones(p), 0.1 * np.ones(p)])
+res = minimize(qaoa_expectation, x0, method="powell", options={"maxiter": maxiter})
+
+print("Optimized cost  ⟨C(Z)⟩:", res.fun)
+betas_opt = res.x[:p]
+gammas_opt = res.x[p:]
+print("Optimized betas:", betas_opt)
+print("Optimized gammas:", gammas_opt)
+
+# ---- Rebuild circuit with optimal params and inspect ----
+circ_opt = build_qaoa_circuit(n, G, betas_opt, gammas_opt)
+state = QuantumState(n, use_multi_cpu=use_multi_cpu)
+state.set_zero_state()
+circ_opt.update_quantum_state(state)
+
+probs = np.abs(state.get_vector()) ** 2
+print("Probabilities:", probs)
+
+# (Optional) report the best bitstring observed in amplitudes (for small n)
+best_idx = int(np.argmax(probs))
+best_bitstring = format(best_idx, "b").zfill(n)
+
+def maxcut_value(bitstring: str) -> float:
+    # Max-Cut value = sum_{(i,j) in E} w_ij * (1 - s_i s_j)/2, with s_i = (-1)^{z_i}
+    z = np.array([int(b) for b in bitstring], dtype=int)
+    s = 1 - 2*z  # 0->+1, 1->-1
+    val = 0.0
+    for (i, j, data) in G.edges(data=True):
+        w = float(data["weight"])
+        val += 0.5 * w * (1.0 - s[i] * s[j])
+    return val
+
+print(f"Most probable bitstring: {best_bitstring}")
+print(f"Estimated Max-Cut value for it: {maxcut_value(best_bitstring)}")
+```
+
+Optional micro-improvements:
+- For small n, brute-force the exact Max-Cut to compare against your best sampled bitstring.
+- If you’ll scale up, switch from printing the full probability vector to sampling (e.g., state.sampling(K)), then compute cut values for the samples.
+
+
+Now, we can execute QAOA algorithm on Deucalion using the follwing jobscript:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=QAOA
+#SBATCH --account=i20240010a
+#SBATCH --partition=normal-arm
+#SBATCH --nodes=2
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=48
+#SBATCH --time=48:00:00
+#SBATCH --mem=0
+#SBATCH --exclusive
+#SBATCH --array=31 
+#SBATCH -o qaoa_%a_%j.out    
+#SBATCH -e qaoa_%a_%j.err
+
+
+# Load environment
+ml qulacs
+# If SciPy and networkx aren't in your Python env
+module load networkx/3.1-foss-2024a
+module load SciPy-bundle/2024.05-gfbf-2024a
+
+# Set OpenMP environment variables
+export OMP_NUM_THREADS=48
+export OMP_PROC_BIND=spread
+export OMP_PLACES=cores
+
+# ---- EXECUTE ----------------------------------------------------------
+srun python qaoa_qulacs.py --n_qubits ${SLURM_ARRAY_TASK_ID} --n_layers 2
+
+``` 
+- Distributed state enabled in code: make sure your Python uses QuantumState(n, use_multi_cpu=True) when running with `--ntasks>1`; otherwise both ranks will build full copies and run independently.
+- SciPy availability: Qulacs use scipy classical optimizers for updating the parameters of the parameterized quantum circuit. Ensure SciPy is present in your module stack/venv (e.g., module load SciPy-bundle/... or your Python env).
+  
+You can test QAOA yourself by running the provided job script on `scripts/arm_partition/qaoa/`. 
 ## 4. References and additional information
 <li><strong>Qulacs Official Documentation:</strong> <a href="https://qulacs.readthedocs.io/en/latest/">https://qulacs.readthedocs.io/en/latest/</a></li>
 <li><strong>Qulacs GitHub Repository:</strong> <a href="https://github.com/qulacs/qulacs">https://github.com/qulacs/qulacs</a></li>
