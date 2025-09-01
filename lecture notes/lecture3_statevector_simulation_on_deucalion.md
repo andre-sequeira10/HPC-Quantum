@@ -1028,23 +1028,23 @@ To use QAOA, we map this classical cost function to a **quantum cost Hamiltonian
 
 QAOA uses $p$ layers of two unitaries—one from the cost and one from a simple mixing Hamiltonian—applied to a uniform superposition:
 $$
-|s\rangle = |+\rangle^{\otimes n} = \frac{1}{2^{n/2}}\sum_{z=0}^{2^n-1}|z\rangle,
+|s\rangle = |+\rangle^{\otimes n} = \frac{1}{2^{n/2}}\sum_{z=0}^{2^n-1}|z\rangle
 $$
 
 $$
-|\beta,\gamma\rangle \;=\; U_X(\beta^{(p)})\,U_C(\gamma^{(p)})\cdots U_X(\beta^{(1)})\,U_C(\gamma^{(1)})\,|s\rangle,
+|\beta,\gamma\rangle = U_X(\beta^{(p)})U_C(\gamma^{(p)})\cdots U_X(\beta^{(1)})U_C(\gamma^{(1)})\,|s\rangle
 $$
 
 with parameters $\beta=(\beta^{(1)},\ldots,\beta^{(p)})$ and $\gamma=(\gamma^{(1)},\ldots,\gamma^{(p)})$. The layer unitaries are
 
 $$
-U_C(\gamma^{(i)})=\exp\!\big(-i\,\gamma^{(i)}\,C(Z)\big)
-=\prod_\alpha \exp\!\big(-i\,\gamma^{(i)}\,C_\alpha(Z)\big),
+U_C(\gamma^{(i)})=\exp \big(-i\gamma^{(i)}C(Z)\big)
+=\prod_\alpha \exp \big(-i\gamma^{(i)}C_\alpha(Z)\big)
 $$
 
 $$
-U_X(\beta^{(i)})=\exp\!\Big(-i\,\beta^{(i)}\sum_{j=1}^n X_j\Big)
-=\prod_{j=1}^n \exp\!\big(-i\,\beta^{(i)} X_j\big).
+U_X(\beta^{(i)})=\exp \Big(-i \beta^{(i)}\sum_{j=1}^n X_j\Big)
+=\prod_{j=1}^n \exp\big(-i \beta^{(i)} X_j\big).
 $$
 
 Intuitively, $U_C$ **imprints** problem structure, while $U_X$ **mixes** amplitudes across bitstrings.
@@ -1054,7 +1054,7 @@ Intuitively, $U_C$ **imprints** problem structure, while $U_X$ **mixes** amplitu
 Given $|\beta,\gamma\rangle$, define the variational objective
 
 $$
-F(\beta,\gamma)=\langle \beta,\gamma|\,C(Z)\,|\beta,\gamma\rangle.
+F(\beta,\gamma)=\langle \beta,\gamma|C(Z)|\beta,\gamma\rangle
 $$
 
 
@@ -1072,21 +1072,21 @@ A classical optimizer updates $(\beta,\gamma)$ to **minimize** $F$. The hybrid l
 For a graph $G=(V,E)$, Max-Cut seeks a bipartition that **maximizes** the number of edges crossing the cut. Using the $\pm1$ spin convention $s_i=(-1)^{z_i}$, a standard cost is
 
 $$
-C(z) \;=\; -\frac{1}{2}\sum_{(i,j)\in E}\big(1 - s_i s_j\big)
+C(z) = -\frac{1}{2}\sum_{(i,j)\in E}\big(1 - s_i s_j\big)
 \quad\Longleftrightarrow\quad
-C(Z)\;=\;\frac{1}{2}\sum_{(i,j)\in E} Z_i Z_j \;+\; \text{(constant)}.
+C(Z)=\frac{1}{2}\sum_{(i,j)\in E} Z_i Z_j + \text{(constant)}.
 $$
 
 For the 4-vertex cycle, $E=\{(0,1),(1,2),(2,3),(3,0)\}$, so (dropping constants)
 
 $$
-C(Z) \;=\; \frac{1}{2}\,\big(Z_0 Z_1+Z_1 Z_2+Z_2 Z_3+Z_3 Z_0\big).
+C(Z) = \frac{1}{2} \big(Z_0 Z_1+Z_1 Z_2+Z_2 Z_3+Z_3 Z_0\big)
 $$
 
-**Implementation hint.** Each two-qubit phase $\exp(-i\,\gamma\,Z_i Z_j)$ can be compiled with a **CNOT–RZ–CNOT** pattern:
+**Implementation hint.** Each two-qubit phase $\exp(-i \gamma Z_i Z_j)$ can be compiled with a **CNOT–RZ–CNOT** pattern:
 
 $$
-e^{-i \gamma Z_i Z_j} = \mathrm{CNOT}_{i\to j}\;\cdot\; e^{-i \gamma Z_j}\;\cdot\;\mathrm{CNOT}_{i\to j}.
+e^{-i \gamma Z_i Z_j} = \mathrm{CNOT}_{i\to j} \cdot e^{-i \gamma Z_j} \cdot \mathrm{CNOT}_{i\to j}
 $$
 
 ---
