@@ -1107,9 +1107,11 @@ obs.add_operator(PauliOperator(f"Z {i} Z {j}", 0.5 * w))
 ```
 
 We encode (up to an additive constant) the Max-Cut cost as
-$$
+
+```math
 C(Z)=\tfrac12 \sum_{(i,j)\in E} w_{ij} Z_i Z_j.
-$$
+```
+
 In Qulacs, an Observable holds a weighted sum of Pauli terms; later we compute $\langle C(Z)\rangle$ directly from the state.
 
 
