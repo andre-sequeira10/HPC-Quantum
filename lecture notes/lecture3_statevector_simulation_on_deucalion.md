@@ -1027,6 +1027,7 @@ To use QAOA, we map this classical cost function to a **quantum cost Hamiltonian
 ---
 
 QAOA uses $p$ layers of two unitaries—one from the cost and one from a simple mixing Hamiltonian—applied to a uniform superposition:
+
 $$
 |s\rangle = |+\rangle^{\otimes n} = \frac{1}{2^{n/2}}\sum_{z=0}^{2^n-1}|z\rangle
 $$
@@ -1085,9 +1086,9 @@ $$
 
 **Implementation hint.** Each two-qubit phase $\exp(-i \gamma Z_i Z_j)$ can be compiled with a **CNOT–RZ–CNOT** pattern:
 
-$$
+```math
 e^{-i \gamma Z_i Z_j} = \mathrm{CNOT}_{i\to j} \cdot e^{-i \gamma Z_j} \cdot \mathrm{CNOT}_{i\to j}
-$$
+```
 
 ---
 
