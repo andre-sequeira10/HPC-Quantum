@@ -67,15 +67,15 @@ What if we use a classical computer to represent qubits ? The state vector of a 
       </tr>
     </thead>
     <tbody>
-      <tr><td>1</td><td>32 Bytes</td></tr>
-      <tr><td>2</td><td>64 Bytes</td></tr>
-      <tr><td>4</td><td>256 Bytes</td></tr>
-      <tr><td>8</td><td>4 KB</td></tr>
-      <tr><td>16</td><td>1 MB</td></tr>
-      <tr><td>30</td><td>16 GB</td></tr>
-      <tr><td>31</td><td>32 GB</td></tr>
-      <tr><td>32</td><td>64 GB</td></tr>
-      <tr><td>40</td><td>16 TB</td></tr>
+      <tr><td>1</td><td>32 B</td></tr>
+      <tr><td>2</td><td>64 B</td></tr>
+      <tr><td>4</td><td>256 B</td></tr>
+      <tr><td>8</td><td>4 KiB</td></tr>
+      <tr><td>16</td><td>1 MiB</td></tr>
+      <tr><td>30</td><td>16 GiB</td></tr>
+      <tr><td>31</td><td>32 GiB</td></tr>
+      <tr><td>32</td><td>64 GiB</td></tr>
+      <tr><td>40</td><td>16 TiB</td></tr>
     </tbody>
   </table>
   <p><em>Table 1: Quantum statevector simulation: Memory as a function of the number of qubits</em></p>

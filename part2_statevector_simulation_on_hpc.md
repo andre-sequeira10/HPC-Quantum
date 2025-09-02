@@ -25,7 +25,7 @@ A quantum state can be represented as a $2^n$-dimensional complex vector, where 
 \end{pmatrix}
 ```
 
-Statevector simulators store the quantum state in a dense vector of $2^n$ complex amplitudes $\alpha_i$. Recall the we need an amount of memory that grows exponentially with the number of qubits, $n$ as presented in Table 1 below.
+Statevector simulators store the quantum state in a dense vector of $2^n$ complex amplitudes $\alpha_i$. Recall that we need an amount of memory that grows exponentially with the number of qubits, $n$ as presented in Table 1 below.
 
 <div align="center">
   <table>
@@ -67,7 +67,7 @@ u_{2^n-1,0} & u_{2^n-1,1} & \cdots & u_{2^n-1,2^n-1}
 \end{pmatrix}
 ```
 
-Statevector simulation is the process of applying a quantum circuit to a quantum state, which can be represented as a sequence matrix vector multiplications. However, the matrix multiplication is not performed directly on the $2^n \times 2^n$ matrix, but rather decomposed into a sequence of 1- and 2-qubit gates, which are applied to the state vector and gates are applied by modifying the state vector in-place, based on the linear transformation induced by the gate. This happens because universal quantum computation is achieved with a set of 1- and 2-qubit gates, for instance the Clifford+T gate set {H, CNOT, S, T}. Figure 1 below depicts the decomposition of the 3-qubit Toffoli gate into a sequence of 1- and 2-qubit gates.
+Statevector simulation is the process of applying a quantum circuit to a quantum state, which can be represented as a sequence of matrix vector multiplications. However, the matrix multiplication is not performed directly on the $2^n \times 2^n$ matrix, but rather decomposed into a sequence of 1- and 2-qubit gates, which are applied to the state vector and gates are applied by modifying the state vector in-place, based on the linear transformation induced by the gate. This happens because universal quantum computation is achieved with a set of 1- and 2-qubit gates, for instance the Clifford+T gate set {H, CNOT, S, T}. Figure 1 below depicts the decomposition of the 3-qubit Toffoli gate into a sequence of 1- and 2-qubit gates.
 
 <div align="center">
   <img src="images/phpv3x9Nz.png" alt="Bloch sphere" width="600">
