@@ -574,8 +574,6 @@ Then we create the following jobscript:
 #SBATCH -o ghz_%j.out
 #SBATCH -e ghz_%j.err
 
-#SBATCH --array=4-30
-
 ml qulacs
 
 # Set OpenMP environment variables
@@ -583,19 +581,20 @@ export OMP_NUM_THREADS=48              # or: ${SLURM_CPUS_PER_TASK}
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread            # try 'close' vs 'spread' and benchmark
 
-srun python ghz.py --n_qubits=${SLURM_ARRAY_TASK_ID}
+srun python ghz.py --n_qubits 30 
 ```
 
 What the jobscript does (step-by-step):
 
 1.	Chooses account, normal-arm partition, wall-time, and a single node.
 2.	Runs 1 task `--ntasks=1` with 48 CPU cores `--cpus-per-task=48`, no SMT `--hint=nomultithread`, and exclusive node use.
-3.	Uses a job array 4-30 → launches one run per $n \in [4 \dots 30]$ (value passed via `SLURM_ARRAY_TASK_ID`).
-4.	Loads Qulacs via the module system (ml qulacs).
-5.	Sets OpenMP controls so Qulacs threads match the cores reserved and are pinned to cores (PLACES=cores, PROC_BIND=spread).
-6.	Launches the program with srun, passing `--n_qubits=${SLURM_ARRAY_TASK_ID}`.
+3.	Loads Qulacs via the module system (ml qulacs).
+4.	Sets OpenMP controls so Qulacs threads match the cores reserved and are pinned to cores (PLACES=cores, PROC_BIND=spread).
+5.	Launches the program with srun, passing `--n_qubits=30`.
 
-How to run and fetch results
+Imagine that you would like to run the algorithm for a set of qubits. You can use a job array `--array=4-30` to launch one run per $n \in [4 \dots 30]$. In this case the number of qubits should be attached to the slurm task being executed as `--n_qubits=${SLURM_ARRAY_TASK_ID}`.
+
+How to run and fetch results:
 
 1.	Save the python script as `ghz.py` and jobscript as `jobscript_ghz.sh` in the same directory.
 2.	Submit the array job with `sbatch jobscript_ghz.sh`.
@@ -683,7 +682,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread   # try 'close' vs 'spread' and benchmark
 
-srun python ghz_multicpu.py --n_qubits=31
+srun python ghz_multicpu.py --n_qubits 31
 ```
 
 This SLURM script launches a **distributed** Qulacs run across **2 nodes** with **1 MPI rank per node**. Each rank uses **48 OpenMP threads**. Qulacs distributes the state when your Python creates it with `QuantumState(n, use_multi_cpu=True)`.
@@ -963,7 +962,7 @@ export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OMP_PLACES=cores
 export OMP_PROC_BIND=spread
 
-srun python grover_multicpu.py --n_qubits=31
+srun python grover_multicpu.py --n_qubits 31
 ```
 The jobscript above requests 32 nodes and 32 `--ntasks`. From Table 3 using the `normal-arm` partition we would be able to simulate Grover's algorithm up to a maximum of 35 qubits. Test it yourself using the Grover scripts in `scripts/arm_partition/grover`.
 
@@ -980,14 +979,14 @@ The jobscript above requests 32 nodes and 32 `--ntasks`. From Table 3 using the 
 #SBATCH --cpus-per-task=32
 #SBATCH --time=24:00:00
 #SBATCH --mem=0
-#SBATCH --array=28,30
+#SBATCH --array=28
 #SBATCH -o grover_gpu_%a_%j.out 
 #SBATCH -e grover_gpu_%a_%j.err
 
 # Load environment
 ml qulacs/0.6.11-foss-2023a-CUDA-12.1.1
 
-srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
+srun python grover_example.py --n_qubits 28
 ```
 
 This example uses the **GPU-enabled Qulacs module** (`ml qulacs/0.6.11-foss-2023a-CUDA-12.1.1`) rather than the CPU-only build. When running on GPU, your Python code must construct the state with **`QuantumStateGpu`** (not `QuantumState`), e.g.
@@ -1275,7 +1274,6 @@ Now, we can execute QAOA algorithm on Deucalion using the follwing jobscript:
 #SBATCH --time=48:00:00
 #SBATCH --mem=0
 #SBATCH --exclusive
-#SBATCH --array=31 
 #SBATCH -o qaoa_%a_%j.out    
 #SBATCH -e qaoa_%a_%j.err
 
@@ -1292,7 +1290,7 @@ export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
-srun python qaoa_qulacs.py --n_qubits ${SLURM_ARRAY_TASK_ID} --n_layers 2
+srun python qaoa_qulacs.py --n_qubits 31 --n_layers 2
 
 ``` 
 - Distributed state enabled in code: make sure your Python uses QuantumState(n, use_multi_cpu=True) when running with `--ntasks>1`; otherwise both ranks will build full copies and run independently.
