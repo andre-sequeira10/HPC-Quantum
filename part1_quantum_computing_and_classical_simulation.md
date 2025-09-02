@@ -1,10 +1,14 @@
-# Lecture 1 - Quantum Computing and classical simulation
+# Part 1 - Quantum Computing and classical simulation
 
-- [Lecture 1 - Quantum Computing and classical simulation](#lecture-1---quantum-computing-and-classical-simulation)
+- [Part 1 - Quantum Computing and classical simulation](#part-1---quantum-computing-and-classical-simulation)
   - [1. Qubits and state vectors ](#1-qubits-and-state-vectors-)
   - [2. Single-qubit gates ](#2-single-qubit-gates-)
   - [3. Multi-qubit gates ](#3-multi-qubit-gates-)
   - [4. References ](#4-references-)
+
+Part 1 offers a compact introduction to quantum computing through the lens of linear algebra and Dirac notation, using Qulacs as our working quantum simulator. Here we provide small introductory examples in qulacs but the user should navigate to the [qulacs documentation](http://docs.qulacs.org/en/latest/index.html) for more in depth information about the quantum simulator and/or the [quantum native dojo](https://dojo.qulacs.org/en/latest/index.html) for more quantum computing tutorials and quantum algorithmic implementations.  
+
+We’ll represent qubits as vectors in complex Hilbert spaces, act on them with unitary gates, and observe interference and entanglement in a matrix-based framework. Along the way, we’ll discuss classical simulation—focusing on statevector simulation—as a first step toward understanding how quantum statevectors are handled in exponentially large spaces, and why High Performance Computing (HPC) systems become essential for scaling these simulations.
 
 ## 1. Qubits and state vectors <a id ="1-qubits-and-state-vectors-"></a>
 
@@ -25,15 +29,17 @@ While the qubit can be in a definite classical state, it can also be a linear co
 ```
 
 where the qubit can be in a mixture of both 0 and 1 with *probability amplitudes*  $\alpha$ and $\beta$ , respectively. 
->**Note**: This does not mean that the qubit is in either state with some probability and it just so happens that we do not know which - a qubit is not a probabilistic bit !! At the subatomic level, both states physically happen at the same time. Crucially, it encompasses classical probability theory because $\alpha$ and $\beta$  are complex numbers. These are complex to sustain the axioms of quantum theory as quantum states live in a complex Hilbert space.  Once the qubit is measured, it results in *superposition collapse* , returning again one classical bit of information with probabilities such that  $|\alpha|^2 + |\beta|^2 = 1$ 
+>**NOTE**: This does not mean that the qubit is in either state with some probability and it just so happens that we do not know which - a qubit is not a probabilistic bit !! At the subatomic level, both states physically happen at the same time. Crucially, it encompasses classical probability theory because $\alpha$ and $\beta$  are complex numbers. These are complex to sustain the axioms of quantum theory as quantum states live in a complex Hilbert space.  Once the qubit is measured, it results in *superposition collapse* , returning again one classical bit of information with probabilities such that  $|\alpha|^2 + |\beta|^2 = 1$ 
+
+In Qulacs we can create a quantum state and visualize its properties as follows: 
 
 ```python
 from qulacs import QuantumState
 
-# Generate 2 qubit states
-
+# Generate a single-qubit n=1
 n = 1
 
+# Create quantum state
 state = QuantumState(n)
 
 print(state)
@@ -47,17 +53,17 @@ print(state)
 
 The superposition is a powerful feature of quantum computers since with $n$ qubits we can represent every $2^n$ possible values simultaneously. 
 
->**NOTE:** Quantum superposition alone does not provide advantage at all. Because it depends on how we actually measure the system and retrieve classical information of interest. To understand that we need to introduce *quantum gates* - more on that later.
+>**NOTE:** Quantum superposition alone does not provide advantage at all. Because it depends on how we actually measure the system and retrieve classical information of interest.
 
-What if we use a classical computer to represent qubits ? The state vector of a qubit is represented by two complex numbers $(\alpha \quad \beta)$. You would typically require 8 bytes in double precision to represent both the real and complex parts of each complex amplitude. Therefore, as one qubit requires 16 bytes, $n$ qubits would need $2^n \times 16$  bytes of memory. Table 1 represents the amount of memory necessary to store a quantum state vector as a function of the number of qubits, assuming **16 bytes per amplitude**.
+What if we use a classical computer to represent qubits ? The state vector of a qubit is represented by two complex numbers $(\alpha \quad \beta)$. You would typically require 8 bytes in double precision to represent both the real and complex parts of each complex amplitude. Therefore, as one amplitude requires 16 bytes, $n$ qubits would need $2^n \times 16$  bytes of memory. Table 1 represents the amount of memory necessary to store a quantum state vector as a function of the number of qubits, assuming **16 bytes per amplitude**.
 
 
 <div align="center">
   <table>
     <thead>
       <tr>
-        <th>Qubits n</th>
-        <th>Memory (2^n × 16 Bytes)</th>
+        <th>Qubits</th>
+        <th>Memory</th>
       </tr>
     </thead>
     <tbody>
@@ -76,7 +82,7 @@ What if we use a classical computer to represent qubits ? The state vector of a 
 </div>
 
 
-As we can see, the amount of memory grows exponentially with the number of qubits. For example, to store a quantum state of 30 qubits, one needs 16GB of memory - the memory of a regular laptop. For 40 qubits one already needs 16TB. Therefore, in the absence of real quantum hardware, to simulate quantum phenomena we need to use HPC systems *where memory can be distributed across several computing processing units*. 
+**The amount of memory grows exponentially with the number of qubits**. For example, to store a quantum state of 30 qubits, one needs 16GB of memory - the memory of a regular laptop. For 40 qubits one already needs 16TB. Therefore, in the absence of real quantum hardware, to simulate quantum phenomena we need to use HPC systems *where memory can be distributed across several computing processing units*. 
 
 ## 2. Single-qubit gates <a id ="2-single-qubit-gates-"></a>
 
@@ -110,7 +116,7 @@ $$
 
 <div align="center">
   <img src="images/rx.png" alt="Bloch sphere" width="350">
-  <p><em>Figure 1: Rx rotation and respective statevector. </em></p>
+  <p><em>Figure 1: Rx rotation on the Bloch sphere. </em></p>
 </div>
 
 The Y gate flips the state of a qubit with a complex phase shift, i.e. $Y |0\rangle = i |1\rangle$ and $Y |1\rangle = -i |0\rangle$. The Ry gate rotates the qubit around the y-axis of the Bloch sphere by an angle $\theta$,
@@ -126,7 +132,7 @@ $$
 
 <div align="center">
 <img src="images/ry.png" alt="Bloch sphere" width="350">
-  <p><em>Figure 2: Ry rotation and respective statevector. </em></p>
+  <p><em>Figure 2: Ry rotation on the Bloch sphere. </em></p>
 </div>
 
 The Z gate applies a phase shift to the state of a qubit, i.e. $Z |0\rangle = |0\rangle$ and $Z |1\rangle = -|1\rangle$. The Rz gate rotates the qubit around the z-axis of the Bloch sphere by an angle $\theta$, leaving the state unchanged in the x-y plane,
@@ -141,10 +147,10 @@ $$
 
 <div align="center">
 <img src="images/rz.png" alt="Bloch sphere" width="350">
-  <p><em>Figure 3: Rz rotation and respective statevector. </em></p>
+  <p><em>Figure 3: Rz rotation on the Bloch sphere. </em></p>
 </div>
 The Hadamard gate is a special single-qubit gate that creates a superposition state from a definite state. It is defined as follows:
-The *Hadamard* gate is one fundamental operation that creates the uniform superposition state over two qubits :
+The **Hadamard** gate is one fundamental operation that creates the uniform superposition state over two qubits :
 
 $$
 H = \frac{1}{\sqrt{2}} \begin{pmatrix}
@@ -159,8 +165,9 @@ H |0\rangle = \frac{1}{\sqrt{2}}|0\rangle + \frac{1}{\sqrt{2}}|1\rangle = \begin
 
 <div align="center">
 <img src="images/h.png" alt="Bloch sphere" width="350">
-  <p><em>Figure 4: Single-qubit Hadamard gate applied to the state zero, and respective statevector. </em></p>
+  <p><em>Figure 4: Single-qubit Hadamard gate applied to the state zero and respective rotation on the Bloch sphere. </em></p>
 </div>
+
 If we apply the Hadamard gate to $n$ qubits individually, we can create a uniform superposition state over all $2^n$ possible states,
 
 $$
@@ -173,6 +180,7 @@ $$
 H^{\otimes 3} |0\rangle^{\otimes 3} = \frac{1}{\sqrt{8}} (|000\rangle + |001\rangle + |010\rangle + |011\rangle + |100\rangle + |101\rangle + |110\rangle + |111\rangle)
 $$
 
+In Qulacs we can create a quantum circuit and add quantum gates to it. The uniform superposition state can be created as follows:
 ```python
 from qulacs import QuantumCircuit
 from qulacsvis import circuit_drawer
@@ -204,6 +212,7 @@ circuit_drawer(circuit, 'mpl')
 (0.353553,0)
 (0.353553,0)
 ```
+Notice we are depicting the quantum circuit associated with the operations written in qulacs. You can do this by using the qulacs quantum circuit visualization tool `qulacsvis` (It must be installed separately from qulacs , via `pip install qulacsvis`. See [qulacsvis](https://github.com/Qulacs-Osaka/qulacs-visualizer) for more information).
 
 If we were to measure the state after applying the Hadamard gate to $n$ qubits, we would get one of the $2^n$ states with *equal probability*. Therefore, to get to "quantum advantage", we need to manipulate the superposition, i.e. the amplitudes of the states, in such a way that we can retrieve the classical information of interest either with high probability or deterministically. One way of achieving this is through *quantum interference* - a phenomenon where the amplitudes of certain states can be amplified while others are suppressed.
 
@@ -288,6 +297,8 @@ $$
 |\Phi^+\rangle = \frac{1}{\sqrt{2}} (|00\rangle + |11\rangle)
 $$
 
+In Qulacs, the Bell state can be created and visualized as follows:
+
 ```python
 from qulacs import QuantumCircuit, QuantumState
 from qulacsvis import circuit_drawer
@@ -321,7 +332,7 @@ print(state)
 ```
 Bell states are a special class of entangled states that exhibit strong correlations between the qubits. They are used in many quantum algorithms and protocols, such as quantum teleportation and quantum key distribution. Bell states cannot be factorized into a tensor product of individual qubit states, i.e. they are *entangled* states which makes it even harder to simulate classically with a Schrodinger type statevector simulator.
 
->**NOTE**: Simulating 40 qubits with a Schrodinger type statevector simulator require 16 TB of memory (See Table 1). However, even though we had HPC system with a memory to say 100 qubits, it doesn't mean we would be able to simulate every quantum system, because the computing time will be, in general, **exponential** since we are simulating n-qubit gates that happen natively at the hardware level in an actual quantum computer. However, there is still circuit classes where classically efficient simulation is indeed possible in polynomial time such as *Clifford circuits* - composed of gates of the set {H, CNOT, S}.
+>**NOTE**: Simulating 40 qubits with a Schrodinger type statevector simulator require 16 TB of memory (See Table 1). However, even though we had HPC system with a memory to say 100 qubits, it doesn't mean we would be able to simulate every quantum system, because the computing time will be, in general, **exponential** since we are simulating n-qubit gates that happen natively at the hardware level in an actual quantum computer. However, there is still circuit classes where classically efficient simulation is indeed possible in polynomial time as a function of the number of qubits, for instance, *Clifford circuits* - composed of gates of the set {H, CNOT, S}.
 >
 >Bell states or in general n-qubit Greenberger-Horne-Zeilinger (GHZ) states, 
 
@@ -329,7 +340,7 @@ Bell states are a special class of entangled states that exhibit strong correlat
 |GHZ\rangle = \frac{1}{\sqrt{2}} (|00\ldots 0\rangle + |11\ldots 1\rangle)
 >$$
 
->are good examples of highly entangled states implemented by Clifford circuits as presented below.  
+>are good examples of highly entangled states implemented by Clifford circuits. GHZ states can be created in a similar way to Bell states in Qulacs: 
 
 ```python
 from qulacs import QuantumCircuit, QuantumState
@@ -375,7 +386,7 @@ print(state)
 (0.707107,0)
 ```
 >These states are special because rather than tracking the state of the n-qubit system by storing and updating its $2^n$ complex amplitudes, one can instead track the system’s 
-$n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). However, a simulator other than Schrodinger statevector is actually needed to efficiently simulate these circuits, as is the case of the *clifford simulators*. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits.
+$n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). This means that entangled quantum states can still be simulated efficiently with a classical computer. However, a simulator other than Schrodinger statevector is actually needed to efficiently simulate these circuits, as is the case of the *clifford simulators*. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits.
 
 <div align="center">
 <img src="images/ghz_state_simulation_time.png" alt="ghz" width="500">
@@ -393,15 +404,10 @@ T = \begin{pmatrix}
 \end{pmatrix}
 $$
 
-Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However Large non-Clifford content or magic make these simulators scale roughly exponentially in the T-count. A linear (or even moderate) number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, deep Clifford+T, QAOA at higher depth, quantum volume, chaotic dynamics), tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
+Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However, large non-Clifford content or *magic* make these simulators scale roughly exponentially in the T-count. A moderate number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, or deep Clifford+T, QAOA at higher depth, quantum volume, chaotic dynamics, tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
 - **Data-parallelism** maps perfectly to hardware: every 1–2 qubit gate is a bulk stream over the $2^n$ amplitudes. 
 - **Predictable scaling**: As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
-- **Mature kernels**: libraries like cuStateVec / Lightning / Qulacs / Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.
-
->**Quantum simulator practical guidance**:
->- Clifford only (H, S, CNOT) + Pauli measurements $\rightarrow$ stabilizer (poly-time/mem).
->- Low entanglement / low treewidth / small T-count $\rightarrow$ tensor networks.
->- Large T-count + high entanglement (generic Clifford+T, random circuits, deep QAOA, quantum volume) $\rightarrow$ statevector on HPC 
+- **Mature kernels**: libraries like cuStateVec / Pennylane Lightning / Qulacs / Qiskit Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.
 
 
 ## 4. References <a id ="4-references-"></a>
