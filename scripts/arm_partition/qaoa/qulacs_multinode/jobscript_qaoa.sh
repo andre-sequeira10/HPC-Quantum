@@ -8,9 +8,8 @@
 #SBATCH --time=48:00:00
 #SBATCH --mem=0
 #SBATCH --exclusive
-#SBATCH --array=31 
-#SBATCH -o qaoa_%a_%j.out    
-#SBATCH -e qaoa_%a_%j.err
+#SBATCH -o qaoa_%j.out    
+#SBATCH -e qaoa_%j.err
 
 
 # Load environment
@@ -25,4 +24,4 @@ export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
-srun python qaoa_qulacs.py --n_qubits ${SLURM_ARRAY_TASK_ID} --n_layers 2
+srun python qaoa_qulacs.py --n_qubits 31 --n_layers 2               # --n_layers is the number of layers in the QAOA circuit 

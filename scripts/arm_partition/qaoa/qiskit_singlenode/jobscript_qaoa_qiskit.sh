@@ -9,13 +9,13 @@
 #SBATCH --mem=0
 #SBATCH --exclusive
 #SBATCH --array=20,22,24,26,28,30 # six independent array tasks
-#SBATCH -o qaoa_qiskit_sv%a.out          # %a = array index (= n_qubits here)
-#SBATCH -e qaoa_qiskit_sv%a.err
+#SBATCH -o qaoa_qiskit_%a.out          # %a -> array index
+#SBATCH -e qaoa_qiskit_%a.err
 
 
 # Load environment
-source /projects/macc/malaca/qiskit/venv_qiskit_multinode/bin/activate
-ml foss/2024a
+ml Qiskit/2.0.2-foss-2023a-opt
+
 
 # Set OpenMP environment variables
 export OMP_NUM_THREADS=48
@@ -29,5 +29,5 @@ export OMP_DISPLAY_ENV=TRUE
 # ---- EXECUTE ----------------------------------------------------------
 # SLURM_ARRAY_TASK_ID takes the value 20 / 22 / … / 30 for each task
 /usr/bin/time -f "elapsed=%E cpu=%P maxrss=%MKB" \
-              -o time_test_qaoa_qiskit_mp${SLURM_ARRAY_TASK_ID}.txt \
+              -o time_test_qaoa_qiskit_${SLURM_ARRAY_TASK_ID}.txt \
     python qaoa_qiskit.py --n_qubits ${SLURM_ARRAY_TASK_ID}

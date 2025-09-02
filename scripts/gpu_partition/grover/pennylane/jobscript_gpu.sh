@@ -1,13 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=QKGPU
 #SBATCH --account=i20240010g
-#SBATCH --partition=normal-a100-80
-#SBATCH --nodes=2                        # 2 nodes (each with 4 GPUs)
-#SBATCH --tasks-per-node=4             # 4 MPI ranks per node
-#SBATCH --cpus-per-task=32             # 32 cpus per MPI rank since node has 128 cores
+#SBATCH --partition=normal-a100-40
+#SBATCH --nodes=1
+#SBATCH --gpus=1
+#SBATCH --tasks-per-node=1
+#SBATCH --cpus-per-task=32
 #SBATCH --time=24:00:00
 #SBATCH --mem=0
-#SBATCH --array=33
+#SBATCH --array=28
 #SBATCH --exclusive 
 #SBATCH -o grover_state_%a_%j.out
 #SBATCH -e grover_state_%a_%j.err
@@ -20,14 +21,10 @@ ml NCCL/2.18.3-GCCcore-12.3.0-CUDA-12.1.1 \
    CMake/3.26.3-GCCcore-12.3.0 \
    Ninja/1.11.1-GCCcore-12.3.0 
 
-# Activate your environment
+# Activate the penynlane environment
 source /projects/I20240010/qsim/venv_kokkos_gpu_mpi/kokkos-4.6.02/venv_kokkos_gpu_omp_mpi/bin/activate
 
-# Set backend and threads
-#export UCX_TLS=shm,rc_x,cuda_copy,cuda_ipc,^cma   # <-- key line
-#export UCX_TLS=^cma
-export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+#export path to kokkos to run pennylane-kokkos device enabling multi gpu distributed simulation 
 export KOKKOS_INSTALL_PATH=$HOME/kokkos-install/4.5.0/AMPERE80
 export CMAKE_PREFIX_PATH=:"${KOKKOS_INSTALL_PATH}":$CMAKE_PREFIX_PATH
 

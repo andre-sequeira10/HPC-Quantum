@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=QG32
+#SBATCH --job-name=Grover33
 #SBATCH --account=i20240010a
 #SBATCH --partition=normal-arm
 #SBATCH --nodes=8
@@ -9,23 +9,18 @@
 #SBATCH --time=01:00:00
 #SBATCH --mem=0
 #SBATCH --exclusive
-#SBATCH --array=33 # 
-#SBATCH -o grover_48t_mn_%a_%j.out          # %a = array index (= n_qubits here)
-#SBATCH -e grover_48t_mn_%a_%j.err
+#SBATCH -o grover_33_%j.out         
+#SBATCH -e grover_33_%j.err
 
 
 # Load environment
-#source /share/env/module_select.sh
-ml qulacs/0.6.11-foss-2024a-mem
-#source /projects/I20240010/qulacs_python/venv/bin/activate
-
+ml qulacs
 # Set OpenMP environment variables
 export OMP_NUM_THREADS=48
 export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
-# SLURM_ARRAY_TASK_ID takes the value 20 / 22 / … / 30 for each task
 /usr/bin/time -f "elapsed=%E cpu=%P maxrss=%MKB" \
-              -o time_48t_mn_${SLURM_ARRAY_TASK_ID}_${SLURM_JOB_ID}.txt \
-    srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
+              -o time_33_${SLURM_JOB_ID}.txt \
+    srun python grover_example.py --n_qubits 33

@@ -6,8 +6,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
 #SBATCH --time=48:00:00
-#SBATCH --array=30 # six independent array tasks
-#SBATCH -o grover_10its_%a_%j.out          # %a = array index (= n_qubits here)
+#SBATCH --array=30                          # array of tasks but only one task w/ 30 qubits 
+#SBATCH -o grover_10its_%a_%j.out           # %a -> array index 
 #SBATCH -e grover_10its_%a_%j.err
 
 

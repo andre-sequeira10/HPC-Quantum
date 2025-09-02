@@ -90,8 +90,7 @@ tr_circuits = transpile(qc)#, backend = backend)
 
 
 result = backend.run(tr_circuits).result()
-#result = execute(tr_circuits, backend, blocking_enable=True, blocking_qubits=26).result()
-#result = backend.run(qc).result()
+
 
 print("amplitudes: ", result)
 #print("statevector: ", result)

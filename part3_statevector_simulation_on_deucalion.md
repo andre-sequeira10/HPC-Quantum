@@ -9,9 +9,9 @@
     - [1.5 CPU Jobs](#15-cpu-jobs)
     - [1.6 GPU jobs](#16-gpu-jobs)
   - [2. Distributed statevector simulation on Deucalion's partitions](#2-distributed-statevector-simulation-on-deucalions-partitions)
-    - [2.1 ARM partitions ](#21-arm-partitions-)
-    - [2.2 x86 partitions ](#22-x86-partitions-)
-    - [2.3 GPU partitions ](#23-gpu-partitions-)
+    - [2.1 ARM partitions](#21-arm-partitions)
+    - [2.2 x86 partitions](#22-x86-partitions)
+    - [2.3 GPU partitions](#23-gpu-partitions)
   - [3. Examples](#3-examples)
     - [3.1 Hello quantum world](#31-hello-quantum-world)
     - [3.2 Grover's algorithm](#32-grovers-algorithm)
@@ -402,7 +402,7 @@ Assume **1 MPI rank per CPU node**, or **1 rank per GPU** on GPU nodes. Choose t
 
 ---
 
-### 2.1 ARM partitions <a id="11-arm-partitions"></a>
+### 2.1 ARM partitions
 
 - `normal-arm`: **max 128 nodes**  
 - `large-arm` : **max 512 nodes**
@@ -432,7 +432,7 @@ Per-node safe = **16 GiB**
 
 ---
 
-### 2.2 x86 partitions <a id="12-x86-partitions"></a>
+### 2.2 x86 partitions
 
 - `normal-x86`: **max 64 nodes**  
 - `large-x86` : **max 128 nodes**
@@ -461,12 +461,12 @@ Per-node safe = **128 GiB**
 
 ---
 
-### 2.3 GPU partitions <a id="13-gpu-partitions"></a>
+### 2.3 GPU partitions
 - CPU: 2× AMD EPYC 7742 (128 CPU cores total)
 - `normal-a100-40`: **max 4 nodes**, each **4× A100 40 GB** → **16 GPUs** total in this partition  
-    Safe VRAM for state: **~32 GiB/GPU** ⇒ **512 GiB** total across the partition
+    Safe RAM for state: **~32 GiB/GPU** ⇒ **512 GiB** total across the partition
 - `normal-a100-80`: **max 4 nodes**, each **4× A100 80 GB** → **16 GPUs** total  
-    Safe VRAM for state: **~64 GiB/GPU** ⇒ **1 TiB** total across the partition
+    Safe RAM for state: **~64 GiB/GPU** ⇒ **1 TiB** total across the partition
 
 
 
