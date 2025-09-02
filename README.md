@@ -21,7 +21,7 @@ A hands-on, performance-oriented tutorial series that takes you from
    👉 Read: **[part2_statevector_simulation_on_hpc.md](part2_statevector_simulation_on_hpc.md)**  
    (GitHub link: https://github.com/andre-sequeira10/HPC-Quantum/blob/main/part2_statevector_simulation_on_hpc.md)
 
-3. **Part 3 — Deucalion walkthrough**  
+3. **Part 3 — Statevector simulation on Deucalion**  
    Slurm basics; Deucalion's partitions overview; safe memory budgets; **working job scripts** for **GHZ**, **Grover**, and **QAOA** on ARM nodes.  
    👉 Read: **[part3_statevector_simulation_on_deucalion.md](part3_statevector_simulation_on_deucalion.md)**  
    (GitHub link: https://github.com/andre-sequeira10/HPC-Quantum/blob/main/part3_statevector_simulation_on_deucalion.md)
