@@ -1,15 +1,29 @@
-# HPC-Quantum: Quantum Statevector Simulation on Deucalion
+<p align="center">
+  <img src="images/QuantumLab_FCT.svg" alt="HPC-Quantum — Statevector Simulation on Deucalion" width="900">
+</p>
 
-A hands-on, performance-oriented tutorial series that takes you from
-**quantum computing foundations** → **HPC statevector theory** → **real jobs on the Deucalion supercomputer**.
+## Quantum Statevector Simulation on Deucalion
 
-- **Language & stack:** Python + [Qulacs] (primary), with examples also for Qiskit Aer and PennyLane.
-- **Target cluster:** [Deucalion] (ARM, x86 and A100 GPU partitions).
-- **Focus:** Scaling **statevector simulation**; practical memory sizing; node/thread/GPU mapping; Slurm job scripts that “just work”.
+A hands-on tutorial series that takes you from **quantum computing foundations** → **HPC statevector theory** → **real jobs on the Deucalion supercomputer**.
+
+- **Language & stack:** Tutorial primarily in Python + Qulacs, with examples also for Qiskit Aer and PennyLane.
+- **Target cluster:** Deucalion's ARM, x86 and A100 GPU partitions.
+- **Focus:** Scaling **statevector simulation**; practical memory sizing; node/thread/GPU mapping; Working slurm job scripts.
+
+⚡ Quickstart on Deucalion - You must request access to the cluster. Setup an account [here](https://docs.macc.fccn.pt/start/).
 
 ---
 
-## 📚 What’s inside
+### 🔎 Why this repo
+
+- Quantum computing enthusiasts often lack the resources for large-scale simulations on their local machines and lack the expertise to set up HPC environments.
+- **Qulacs** is one of the fastest quantum statevector simulators in practice and it is highly optimized to run on Deucalion's ARM architecture. However, there is little documentation available for users unfamiliar with HPC concepts and large scale Qulacs usage.
+- You get **copy-pasteable** Slurm scripts for CPU and GPU allocations.
+- Clear, cluster-specific **memory tables** up to 40+ qubits to ease the process of requesting the right resources and simplify quantum simulation on Deucalion.
+
+---
+
+### 📚 What’s inside
 
 1. **Part 1 — Quantum computing & classical simulation**  
    Quantum computing through linear algebra and Dirac notation; single- & two-qubit gates; what’s classically easy/hard and statevector simulation.  
@@ -23,17 +37,51 @@ A hands-on, performance-oriented tutorial series that takes you from
    Slurm basics; Deucalion's partitions overview; safe memory budgets; **working job scripts** for **GHZ**, **Grover**, and **QAOA** on ARM nodes.  
    👉 Read: **[part3_statevector_simulation_on_deucalion.md](part3_statevector_simulation_on_deucalion.md)**  
 
+4. **Scripts — ready-to-run Python & Slurm job scripts**  
+   A large set of examples lives in **`scripts/`**, organized by partition type:
+   - **`scripts/arm_partition/`** — ARM A64FX CPU nodes; GHZ/Grover/QAOA with MPI/OpenMP in Qulacs, Qiskit and Pennylane; Matching `jobscript_*.sh`. 
+   - **`scripts/x86_partition/`** — x86 EPYC CPU nodes; mirrors ARM examples with x86-tuned jobscripts.
+   - **`scripts/gpu_partition/`** — A100 GPU nodes; Qulacs GPU and PennyLane/Qiskit Aer examples that leverage NVIDIA cuQuantum.
+  
+   Each example folder contains the Python source (e.g., `*.py`) **and** a Slurm job script you can submit as-is.
 > 💡 Tip: Skim Part 3 first if you just want to run jobs now; circle back to Parts 1–2 for theory and why the scripts are shaped this way.
 
 ---
 
-## 🔎 Why this repo
 
-- For quantum computing enthusiasts that lack the resources for large-scale simulations on their local machines and lack the expertise to set up HPC environments.
-- **Qulacs** is one of the fastest quantum statevector simulators in practice and it is highly optimized to run on Deucalion's ARM architecture. However, there is little documentation available for users unfamiliar with HPC concepts and large scale Qulacs usage.
-- You get **copy-pasteable** Slurm scripts + **sane defaults** for `OMP_*`, MPI ranks, and GPU allocations.
-- Clear, cluster-specific **memory tables** up to 40+ qubits to ease the process of requesting the right resources and simplify quantum simulation on Deucalion.
+### ▶️ Running examples
 
----
+1) **Set your billing account in the jobscript**
 
-## 🗂️ Repository layout
+Open the example’s `jobscript_*.sh` and set:
+
+```bash
+#SBATCH --account=<your account>
+```
+
+> 💡 Tip: On Deucalion, accounts usually end with a (ARM), x (x86), or g (GPU). Example: i20240010a for ARM.
+
+Need to confirm your accounts?
+
+```bash
+sacctmgr show Association where User=<username> format=Cluster,Account%30,User
+```
+
+2)	**Submit and monitor (ARM example: GHZ)**
+
+```bash
+cd scripts/arm_partition/ghz
+sbatch jobscript_ghz.sh
+squeue --me                          # monitor your job
+less ghz_<jobid>.out                 # inspect results
+```
+
+
+### 🔖 References
+- Deucalion user guide - https://docs.macc.fccn.pt
+- Qulacs Docs — https://qulacs.readthedocs.io/en/latest/
+- Quantum Native Dojo — https://dojo.qulacs.org/en/latest/
+- Suzuki et al., Qulacs: a fast and versatile quantum circuit simulator (2020) — https://arxiv.org/pdf/2011.13524
+- Faster Schrödinger-style simulation of quantum circuits — https://arxiv.org/pdf/2008.00216
+- PennyLane demos (Clifford, Tensor Networks) — https://pennylane.ai/qml/demos/
+- Nielsen, M. A., & Chuang, I. L. (2010). Quantum Computation and Quantum Information: 10th Anniversary Edition. Cambridge: Cambridge University Press.
