@@ -34,7 +34,7 @@ Statevector simulators store the quantum state in a dense vector of $2^n$ comple
         <th>Qubits</th>
         <th>Memory</th>
       </tr>
-    </thead>
+    </thead> 
     <tbody>
       <tr><td>1</td><td>32 B</td></tr>
       <tr><td>2</td><td>64 B</td></tr>
@@ -372,7 +372,7 @@ State has 8 amplitudes $a[0..7]$. Let the **MSB** $x_2$ be global.
 
 1) Apply **$H$** on **qubit 0** (LSB, local): pairs are $(0,1),(2,3)$ on rank 0 and $(4,5),(6,7)$ on rank 1. Each rank updates *in place*; **no messages**.
 
-2) Apply **$H$** on **qubit 2** (MSB, global): pairs are $(0,4),(1,5),(2,6),(3,7)$, which straddle ranks. Each rank exchanges half its slice with its partner (rank $\oplus 1$), applies four $2\times2$ multiplies on the received+resident halves, then writes back. **One exchange round** is needed.
+2) Apply **$H$** on **qubit 2** (MSB, global): pairs are $(0,4),(1,5),(2,6),(3,7)$. Each rank exchanges half its slice with its partner.
 
 ---
 
