@@ -404,11 +404,12 @@ T = \begin{pmatrix}
 \end{pmatrix}
 $$
 
-Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However, large non-Clifford content or *magic* make these simulators scale roughly exponentially in the T-count. A moderate number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, or deep Clifford+T, QAOA at higher depth, quantum volume, chaotic dynamics, tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
+Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However, large non-Clifford content or *magic* make these simulators scale roughly exponentially in the T-count. A moderate number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, or deep Clifford+T, QAOA at higher depth ... tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
 - **Data-parallelism** maps perfectly to hardware: every 1–2 qubit gate is a bulk stream over the $2^n$ amplitudes. 
 - **Predictable scaling**: As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
 - **Mature kernels**: libraries like cuStateVec / Pennylane Lightning / Qulacs / Qiskit Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.
 
+>**NOTE**: There are other non-statevector quantum simulation methods that can also be efficient for certain types of quantum circuits worth mentioning. These usually tradeoff computation time and memory. See for instance: 1) *Feynman path sum* - Based on summing over paths through the circuit: expand the amplitude of a basis state as a sum of contributions from all computational paths. 2) *Pauli Propagation* - Works in the Heisenberg picture: track how Pauli operators transform under the circuit instead of evolving the whole statevector. These simulators can work better than statevector simulation. However, they are not as widely used since there is are not many software libraries that implement them widely. They are also not as easily parallelizable or optimized as statevector simulators since the later as matrix vector multiplications map well to modern hardware.
 
 ## 4. References <a id ="4-references-"></a>
 - [Qulacs Documentation](https://qulacs-doc.readthedocs.io/en/latest/)
@@ -418,3 +419,5 @@ Therefore, T-gate count is one of the most important metrics for classical hardn
 - W. Huggins, P. Patil, B. Mitchell, K. B. Whaley, and E. M. Stoudenmire, Quantum Science and Technology 4, 024001 (2019), ISSN 2058-9565, URL http://dx.doi.org/10.1088/2058-9565/aaea94
 - R. Orús, Annals of Physics 349, 117 (2014), ISSN 0003- 4916, URL https://www.sciencedirect.com/science/article/pii/S0003491614001596.
 - Nielsen, M.A., & Chuang, I.L. (2011). Quantum Computation and Quantum Information (10th Anniversary edition).
+- Ferreira, David. (2023) Feynman Path-Sum Quantum Computer Simulator. Online at [repositoriUM](https://repositorium.sdum.uminho.pt/bitstream/1822/89316/1/David%20Alves%20Campos%20Ferreira.pdf)
+- Angrisani, A. et.al (2024) Classically estimating observables of noiseless quantum circuits URL https://arxiv.org/abs/2409.01706
