@@ -339,11 +339,10 @@ Beyond 9 qubits, we cannot usefully employ more than 128 threads on a single x86
 
 This section explains **how** a statevector is distributed across several nodes, then introduces **MPI ranks** and the notions of **local** and **global** qubits, and finally gives concrete **node-count tables** for Deucalion’s ARM and x86 partitions as examples.
 
-An $n$-qubit state is a length-$2^n$ complex vector. With **distributed simulation**, we split this vector across $R$ processes so that **each process stores a disjoint slice**:
+An $n$-qubit state is a complex vector with length $2^n$. With **distributed simulation**, we split this vector across $R$ processes so that **each process stores a disjoint slice**:
 
 $$
-\text{amplitudes per process}=\frac{2^n}{R},\qquad
-\text{bytes per process}=\frac{16\cdot 2^n}{R}
+\text{amplitudes per process}=\frac{2^n}{R}
 $$
 
 A convenient way to view this is **bit slicing**. Let $r=\log_2 R$. We designate the **top $r$ index bits** as **distributed** (also called *global*), and the remaining $n-r$ as **local**. An amplitude index $x_{n-1}\dots x_1x_0$ belongs to the process whose rank ID equals the integer value of the **global** bits $x_{n-1}\dots x_{n-r}$. Inside that process, the **local** bits $x_{n-r-1}\dots x_0$ address the element within its slice.
@@ -354,6 +353,14 @@ A convenient way to view this is **bit slicing**. Let $r=\log_2 R$. We designate
 This preserves the same “tiny mat–vec on pairs/4-tuples” model as single-node simulation; we just add **data exchanges** when a targeted qubit lives among the **global** bits.
 
 ---
+
+🔹 **What are processes, MPI, and MPI ranks?**
+
+- **Process / task:** an OS program instance with its own address space.  
+- **MPI (Message Passing Interface):** the standard API for processes to communicate across nodes.  
+- **MPI rank:** the ID of a process within an MPI job $\{0,\dots,R-1\}$. In distributed simulation, **each rank stores a slice** of the state and participates in exchanges whenever a gate touches **global qubits**.
+
+--- 
 
 🔹 **Tiny statevector examples**
 
@@ -377,19 +384,10 @@ State has 16 amplitudes $a[0..15]$. Let top two bits $x_3x_2$ be global.
 - **Rank 2 (10):** $\{8..11\}$  
 - **Rank 3 (11):** $\{12..15\}$
 
-- Gate on $(q_0,q_1)$ (both local): each rank applies one $4\times4$ per local 4-tuple; **no comm**.  
-- Gate on $(q_1,q_3)$ with $q_3$ global: ranks pair up along the $q_3$-dimension to exchange the needed quarters, apply the $4\times4$, then (optionally) swap back → **one exchange dimension**.  
-- Gate on two **different** global bits (e.g., $q_2$ and $q_3$): you communicate along two dimensions or use a subgroup all-to-all → **heavier comm**.
+- Gate on $(q_0,q_1)$ (both local): each rank applies one $4\times4$ per local 4-tuple; **no communication**.  
+- Gate on $(q_1,q_3)$ with $q_3$ global: communication needed. 
 
----
-
-🔹 **What are processes, MPI, and MPI ranks?**
-
-- **Process / task:** an OS program instance with its own address space.  
-- **MPI (Message Passing Interface):** the standard API for processes to communicate across nodes.  
-- **MPI rank:** the ID of a process within an MPI job $\{0,\dots,R-1\}$. In distributed simulation, **each rank stores a slice** of the state and participates in exchanges whenever a gate touches **global qubits**.
-
-> Practical tip: many simulators support **qubit reordering** (swap a global bit with a local one) so upcoming gates hit local qubits, reducing communication. Here is the excerpt from the [Nvidia CuStateVec simulator](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/distributed-index-bit-swap.html#distributed-state-vector-simulation):
+> **In practice** : many simulators support qubit reordering (swap a global bit with a local one) so upcoming gates hit local qubits, reducing communication. Here is the excerpt from the [Nvidia CuStateVec simulator](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/distributed-index-bit-swap.html#distributed-state-vector-simulation):
 <div align="center">
   <img src="images/custatevec.png" alt="Distributed state vector simulation with qubit reordering from Nvidia CuStateVec simulator." width="600">
   <br>
@@ -398,24 +396,24 @@ State has 16 amplitudes $a[0..15]$. Let top two bits $x_3x_2$ be global.
 
 ---
 
-🔹 **How many nodes do I need?**
+🔹 **How many nodes do you need?**
 
 We size by **memory first**. With double precision, the state size is $16\cdot 2^n$ bytes. For safety we reserve room for workspace/OS, using a **per-node safe state capacity**:
 
 - **Deucalion ARM (A64FX, 32 GiB HBM2/node):** use **16 GiB** per node as “safe” for the state.  
 - **Deucalion x86 (2× EPYC 7742, 256 GiB DRAM/node):** use **128 GiB** per node as “safe”.
 
-Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
+Assume **1 rank per node** and nodes **$N$** such that
 
 ```math
-\frac{16\cdot 2^n}{R}\le \text{safe bytes per node}.
+\frac{16\cdot 2^n}{N}\le \text{safe bytes per node}.
 ```
 
 ### 3.1 Example: Deucalion's ARM partition <a id="31-example-deucalions-arm-partition-"></a>
 
 <div align="center">
 
-| Qubits $n$ | State size | Nodes $R$ (min $2^r$) |
+| Qubits $n$ | State size | Nodes $N$ |
 |---:|---:|---:|
 | 30 | 16 GiB | 1 |
 | 31 | 32 GiB | 2 |
@@ -435,7 +433,7 @@ Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
 
 <div align="center">
 
-| Qubits $n$ | State size | Nodes $R$ (min $2^r$) |
+| Qubits $n$ | State size | Nodes $N$|
 |---:|---:|---:|
 | 33 | 128 GiB | 1 |
 | 34 | 256 GiB | 2 |
@@ -462,7 +460,7 @@ Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
 
 - CPU: 2× AMD EPYC 7742 (128 CPU cores total)
 - GPUs: 4× NVIDIA A100 per node
-- VRAM per GPU:
+- RAM per GPU:
   - **A100-40**: 40 GB → we budget **~32 GiB** for the state (leave headroom for work buffers)
   - **A100-80**: 80 GB → we budget **~64 GiB** for the state
 
@@ -470,7 +468,7 @@ Assume **1 rank per node**. Choose the **smallest power-of-two $R$** such that
 
 ---
 
-Let **C** be the **safe VRAM per GPU** reserved for the state:
+Let **C** be the **safe RAM per GPU** reserved for the state:
 - A100-40: **C ≈ 32 GiB**
 - A100-80: **C ≈ 64 GiB**
 
@@ -489,10 +487,8 @@ With **G GPUs on one node**, total safe state memory is **G·C**.
 | 2 | 32 | 33 |
 | 4 | 33 | 34 |
 
-<p><em>Table 6: Maximum number of qubits $n$ that fit on a single node with multiple A100 GPUs (double precision, safe VRAM).</em></p>
+<p><em>Table 6: Maximum number of qubits n that fit on a single node with multiple A100 GPUs.</em></p>
 </div>
-
-> Adding GPUs gives **+log₂(G)** qubits because memory scales linearly with GPU count.
 
 ---
 
