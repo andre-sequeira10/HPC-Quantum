@@ -1,6 +1,6 @@
-# Lecture 3 - Quantum statevector simulation on Deucalion
+# Part 3 - Quantum statevector simulation on Deucalion
 
-- [Lecture 3 - Quantum statevector simulation on Deucalion](#lecture-3---quantum-statevector-simulation-on-deucalion)
+- [Part 3 - Quantum statevector simulation on Deucalion](#part-3---quantum-statevector-simulation-on-deucalion)
   - [1. Slurm Basics ](#1-slurm-basics-)
     - [1.1 Create a batch script](#11-create-a-batch-script)
     - [1.2 Submit a batch job](#12-submit-a-batch-job)
@@ -235,7 +235,7 @@ module load MyCPUApp
 
 # --- OpenMP/Threading best practices ---
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}  # match threads to allocated cores
-export OMP_PLACES=cores                        # pin to physical cores
+export OMP_PLACES=cores                        # one thread per core
 export OMP_PROC_BIND=spread                    # spread threads across cores
 
 srun MyCPUApp -i input -o output
@@ -245,12 +245,7 @@ srun MyCPUApp -i input -o output
 
 - **`OMP_PROC_BIND=spread` vs `close`**
   - `spread` places threads **as far apart as possible** across the cores in your allocation. This improves **memory bandwidth** and reduces contention—often best for **bandwidth-bound** codes (e.g., state-vector simulation, large BLAS, big arrays).
-  - `close` packs threads **near the master thread** (same core/socket first). This increases **cache locality**—often best for **cache-heavy** kernels with small working sets or lots of **producer→consumer** reuse.
-  - Keep `OMP_PLACES=cores` so binding is at the **physical core** granularity (not SMT siblings). On NUMA systems, `spread` also tends to balance threads across sockets.
-
-- **SLURM `--hint=nomultithread`**
-  - Asks SLURM to allocate only **one logical CPU per physical core** and to **avoid SMT/Hyper-Threading siblings**. This prevents two OpenMP threads from landing on the same core, which can otherwise cause cache and pipeline contention.
-  - Use `--hint=nomultithread` when you want **one thread per core** (the common case for HPC). If your code benefits from SMT, drop it or use `--hint=multithread`.
+  - `close` packs threads **near the master thread** increasing **cache locality**—often best for **cache-heavy** kernels with small working sets or lots of **producer→consumer** reuse.
 
 - **Other tips**
   - Set `OMP_DISPLAY_ENV=true` and (if supported) `OMP_DISPLAY_AFFINITY=true` to print the OpenMP runtime’s binding at startup.
