@@ -448,13 +448,12 @@ Assume **1 rank per node** and nodes **$N$** such that
 <p><em>Table 5: Minimum number of x86 nodes required for distributed statevector simulation up to 42 qubits.</em></p>
 </div>
 
-*(x86 partition has 500 nodes total; up to $n=41$ fits comfortably.)*
+*(x86 partition has 500 nodes total; up to 41 qubits fits comfortably.)*
 
 > **Inside each rank**, keep the single-node threading rule on the **local** problem size: for a $k$-qubit gate,
 > 
 > $T^*_{\text{rank}}\approx \min\big(\text{cores per rank},\ 2^{\,n-r-k}\big)$
-> 
-> and expect speedup to plateau at the node’s **memory bandwidth**. 
+
 
 ### 3.3 Example: Deucalion’s GPU partition <a id="33-example-deucalions-gpu-partition-"></a>
 
@@ -473,11 +472,6 @@ Let **C** be the **safe RAM per GPU** reserved for the state:
 - A100-80: **C ≈ 64 GiB**
 
 With **G GPUs on one node**, total safe state memory is **G·C**.
-
-- **Max n** fits if:  $16\cdot 2^n \le G\cdot C$.
-- Equivalently, $n \le \log_2(G) + \log_2(C/16)$.
-  - For A100-40, $C/16 = 2^{31}$ ⇒ **n ≤ 31 + log₂(G)**.
-  - For A100-80, $C/16 = 2^{32}$ ⇒ **n ≤ 32 + log₂(G)**.
 
 <div align="center">
 
