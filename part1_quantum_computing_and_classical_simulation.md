@@ -386,14 +386,14 @@ print(state)
 (0.707107,0)
 ```
 >These states are special because rather than tracking the state of the n-qubit system by storing and updating its $2^n$ complex amplitudes, one can instead track the system’s 
-$n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). This means that entangled quantum states can still be simulated efficiently with a classical computer. However, a simulator other than Schrodinger statevector is actually needed to efficiently simulate these circuits, as is the case of the *clifford simulators*. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits.
+$n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). This means that entangled quantum states can still be simulated efficiently with a classical computer. However, a simulator other than Schrodinger statevector is actually needed to efficiently simulate these circuits, as is the case of the *clifford simulators*. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits. Qiskit Aer also has a stabilizer simulator that can be used for this purpose, refer to the [Extended stabilizer simulator](https://qiskit.github.io/qiskit-aer/tutorials/6_extended_stabilizer_tutorial.html) for more information.
 
 <div align="center">
 <img src="images/ghz_state_simulation_time.png" alt="ghz" width="500">
 <p><em>Figure 5: Execution time for GHZ state vector simulation vs Clifford simulator. </em></p>
 </div>
 
->Remarkably, Clifford circuits are not universal for quantum computation. Therefore, **entanglement is a necessary resource but not sufficient for both classical hardness and quantum computational advantage**.
+> Remarkably, Clifford circuits are not universal for quantum computation. Therefore, **entanglement is a necessary resource but not sufficient for both classical hardness and quantum computational advantage**.
 
 Universal quantum computation can be achieved by adding a single non-Clifford gate to the set of Clifford gates. An example is the Cliffor+T gate set, which includes the T gate defined as follows:
 
@@ -409,7 +409,12 @@ Therefore, T-gate count is one of the most important metrics for classical hardn
 - **Predictable scaling**: As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
 - **Mature kernels**: libraries like cuStateVec / Pennylane Lightning / Qulacs / Qiskit Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.
 
->**NOTE**: There are other non-statevector quantum simulation methods that can also be efficient for certain types of quantum circuits worth mentioning. These usually tradeoff computation time and memory. See for instance: 1) *Feynman path sum* - Based on summing over paths through the circuit: expand the amplitude of a basis state as a sum of contributions from all computational paths. 2) *Pauli Propagation* - Works in the Heisenberg picture: track how Pauli operators transform under the circuit instead of evolving the whole statevector. These simulators can work better than statevector simulation. However, they are not as widely used since there is are not many software libraries that implement them widely. They are also not as easily parallelizable or optimized as statevector simulators since the later as matrix vector multiplications map well to modern hardware.
+>**NOTE**: There are other non-statevector quantum simulation methods that can also be efficient for certain types of quantum circuits worth mentioning. These usually tradeoff computation time and memory. These simulators can work better than statevector simulation. However, they are not as widely used since there is are not many software libraries that implement them generally. They are also not as easily parallelizable or optimized as statevector simulators since the later as matrix vector multiplications map well to modern hardware. 
+>
+>See for instance:
+>
+>1) *Feynman path sum* - Based on summing over paths through the circuit: expand the amplitude of a basis state as a sum of contributions from all computational paths. 
+>2) *Pauli Propagation* - Works in the Heisenberg picture: track how observables in the Pauli basis conjugate backwards through the circuit. Check [PauliPropagation.jl](https://github.com/MSRudolph/PauliPropagation.jl) for library implementation in Julia.
 
 ## 4. References <a id ="4-references-"></a>
 - [Qulacs Documentation](https://qulacs-doc.readthedocs.io/en/latest/)
@@ -421,3 +426,4 @@ Therefore, T-gate count is one of the most important metrics for classical hardn
 - Nielsen, M.A., & Chuang, I.L. (2011). Quantum Computation and Quantum Information (10th Anniversary edition).
 - Ferreira, David. (2023) Feynman Path-Sum Quantum Computer Simulator. Online at [repositoriUM](https://repositorium.sdum.uminho.pt/bitstream/1822/89316/1/David%20Alves%20Campos%20Ferreira.pdf)
 - Angrisani, A. et.al (2024) Classically estimating observables of noiseless quantum circuits URL https://arxiv.org/abs/2409.01706
+- Rudolph, M. S. (2025) Pauli Propagation: A Computational Framework for Simulating Quantum Systems. URL https://arxiv.org/abs/2505.21606
