@@ -8,7 +8,7 @@
 
 Part 1 offers a compact introduction to quantum computing through the lens of linear algebra and Dirac notation, using Qulacs as our working quantum simulator. Here we provide small introductory examples in qulacs but the user should navigate to the [qulacs documentation](http://docs.qulacs.org/en/latest/index.html) for more in depth information about the quantum simulator and/or the [quantum native dojo](https://dojo.qulacs.org/en/latest/index.html) for more quantum computing tutorials and quantum algorithmic implementations.  
 
-We’ll represent qubits as vectors in complex Hilbert spaces, act on them with unitary gates, and observe interference and entanglement in a matrix-based framework. Along the way, we’ll discuss classical simulation—focusing on statevector simulation—as a first step toward understanding how quantum statevectors are handled in exponentially large spaces, and why High Performance Computing (HPC) systems become essential for scaling these simulations.
+Qubits will be represented as vectors in complex Hilbert spaces, manipulated by unitary gates, and analyzed to illustrate phenomena such as interference and entanglement within a matrix-based framework. This section also introduces classical simulation—emphasizing statevector simulation—as a foundation for understanding the management of quantum statevectors in exponentially large spaces and the necessity of High Performance Computing (HPC) systems for scaling these simulations.
 
 ## 1. Qubits and state vectors <a id ="1-qubits-and-state-vectors-"></a>
 
