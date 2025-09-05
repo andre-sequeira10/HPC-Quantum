@@ -330,17 +330,19 @@ print(state)
        (0,0)
 (0.707107,0)
 ```
-Bell states are a special class of entangled states that exhibit strong correlations between the qubits. They are used in many quantum algorithms and protocols, such as quantum teleportation and quantum key distribution. Bell states cannot be factorized into a tensor product of individual qubit states, i.e. they are *entangled* states which makes it even harder to simulate classically with a Schrodinger type statevector simulator.
+Bell states are a special class of entangled states that exhibit strong correlations between the qubits. They are used in many quantum algorithms and protocols, such as quantum teleportation and quantum key distribution. Bell states cannot be factorized into a tensor product of individual qubit states, i.e. they are *entangled* states which seems to make it even harder to simulate classically (but there is a catch).
 
->**NOTE**: Simulating 40 qubits with a Schrodinger type statevector simulator require 16 TB of memory (See Table 1). However, even though we had HPC system with a memory to say 100 qubits, it doesn't mean we would be able to simulate every quantum system, because the computing time will be, in general, **exponential** since we are simulating n-qubit gates that happen natively at the hardware level in an actual quantum computer. However, there is still circuit classes where classically efficient simulation is indeed possible in polynomial time as a function of the number of qubits, for instance, *Clifford circuits* - composed of gates of the set {H, CNOT, S}.
+>**NOTE**: Simulating 40 qubits with a Schrodinger type statevector simulator require 16 TB of memory (See Table 1). However, even though we had a cluster with the memory to say 100 qubits, it doesn't mean we would be able to simulate every quantum system efficiently, because the computing time will be, in general, **exponential** since we are simulating n-qubit gates that happen natively at the hardware level in an actual quantum computer, let alone the massive space and energy required to run these circuits. However, there is still circuit classes where classically efficient simulation is indeed possible in polynomial time as a function of the number of qubits, for instance, *Clifford circuits* - composed of gates of the set {H, CNOT, S}.
 >
 >Bell states or in general n-qubit Greenberger-Horne-Zeilinger (GHZ) states, 
-
+>
 >$$
 |GHZ\rangle = \frac{1}{\sqrt{2}} (|00\ldots 0\rangle + |11\ldots 1\rangle)
 >$$
+>
+>are good examples of highly entangled states implemented by Clifford circuits. 
 
->are good examples of highly entangled states implemented by Clifford circuits. GHZ states can be created in a similar way to Bell states in Qulacs: 
+GHZ states can be created in Qulacs similarly to Bell states: 
 
 ```python
 from qulacs import QuantumCircuit, QuantumState
@@ -385,8 +387,7 @@ print(state)
        (0,0)
 (0.707107,0)
 ```
->These states are special because rather than tracking the state of the n-qubit system by storing and updating its $2^n$ complex amplitudes, one can instead track the system’s 
-$n$ stabilizer generators using the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). This means that entangled quantum states can still be simulated efficiently with a classical computer. However, a simulator other than Schrodinger statevector is actually needed to efficiently simulate these circuits, as is the case of the *clifford simulators*. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits. Qiskit Aer also has a stabilizer simulator that can be used for this purpose, refer to the [Extended stabilizer simulator](https://qiskit.github.io/qiskit-aer/tutorials/6_extended_stabilizer_tutorial.html) for more information.
+>These states are special because rather than tracking the state of the n-qubit system by storing and updating its $2^n$ complex amplitudes, one can instead track *stabilizer states* only and evolve the state using somethin called the *stabilizer tableau* (see https://pennylane.ai/qml/demos/tutorial_clifford_circuit_simulations). This means that entangled quantum states can still be simulated efficiently with a classical computer. However, a modified Schrodinger statevector is actually needed to efficiently simulate these circuits. Below is depicted the execution time for GHZ state simulation with Schrodinger statevector simulator and Pennylane's Clifford simulator as a function of the number of qubits. Qiskit Aer also has a stabilizer simulator that can be used for this purpose, refer to the [Extended stabilizer simulator](https://qiskit.github.io/qiskit-aer/tutorials/6_extended_stabilizer_tutorial.html) for more information.
 
 <div align="center">
 <img src="images/ghz_state_simulation_time.png" alt="ghz" width="500">
