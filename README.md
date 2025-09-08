@@ -42,8 +42,12 @@ A hands-on tutorial series that takes you from **quantum computing foundations**
    - **`scripts/arm_partition/`** — ARM A64FX CPU nodes; GHZ/Grover/QAOA with MPI/OpenMP in Qulacs, Qiskit and Pennylane; Matching `jobscript_*.sh`. 
    - **`scripts/x86_partition/`** — x86 EPYC CPU nodes; mirrors ARM examples with x86-tuned jobscripts.
    - **`scripts/gpu_partition/`** — A100 GPU nodes; Qulacs GPU and PennyLane/Qiskit Aer examples that leverage NVIDIA cuQuantum.
-  
    Each example folder contains the Python source (e.g., `*.py`) **and** a Slurm job script you can submit as-is.
+
+5. **PennyLane (Lightning-Kokkos + MPI) — Manual install & Slurm**
+   Build-from-source instructions to enable distributed statevector simulation on Deucalion’s ARM nodes (OpenMP + MPI), plus usage notes.  
+   👉 Read: **[README_pennylane.md](README_pennylane.md)**
+   
 > 💡 Tip: Skim Part 3 first if you just want to run jobs now; circle back to Parts 1–2 for theory and why the scripts are shaped this way.
 
 ---
@@ -76,6 +80,14 @@ squeue --me                          # monitor your job
 less ghz_<jobid>.out                 # inspect results
 ```
 
+
+### ⚙️ PennyLane on Deucalion (Lightning-Kokkos + MPI)
+
+PennyLane’s Lightning-Kokkos device is **not yet available as a module** on Deucalion.  
+If you want to run **distributed** simulations (MPI) with PennyLane:
+
+- Follow the manual build guide: **[README_pennylane.md](README_pennylane.md)**.
+- Then try the ready-to-run examples in **`/scripts`**.
 
 ### 🔖 References
 - Deucalion user guide - https://docs.macc.fccn.pt
