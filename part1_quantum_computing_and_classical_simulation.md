@@ -44,6 +44,9 @@ state = QuantumState(n)
 
 print(state)
 ```
+
+the script above creates a single qubit in the zero state and prints its properties:
+
 ```plaintext
 *** Quantum State *** 
 * Qubit Count : 1 
@@ -196,6 +199,7 @@ for i in range(n):
 # display quantum circuit
 circuit_drawer(circuit, 'mpl')
 ```
+The script above outputs:
 
 ![alt text](images/image-1.png)
 ```plaintext
@@ -237,6 +241,8 @@ H Z H |0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix}
 we collapsed the superposition to a definite state $|1\rangle$ with probability 1.
 
 ```python
+from qulacs import QuantumCircuit
+from qulacsvis import circuit_drawer
 
 # Generate 3 qubit uniform superposition state
 n=1
@@ -255,6 +261,9 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
+
+The script above outputs:
+
 ![alt text](images/image-2.png)
 
 ```plaintext
@@ -319,6 +328,8 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
+The script above outputs:
+
 ![alt text](images/image-3.png)
 ```plaintext
 *** Quantum State ***
@@ -364,6 +375,8 @@ state = QuantumState(n)
 circuit.update_quantum_state(state)
 print(state)
 ```
+The script above outputs:
+
 ![alt text](images/image-5.png)
 ```plaintext
 *** Quantum State ***
@@ -405,7 +418,7 @@ T = \begin{pmatrix}
 \end{pmatrix}
 $$
 
-Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However, large non-Clifford content or *magic* make these simulators scale roughly exponentially in the T-count. A moderate number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, or deep Clifford+T, QAOA at higher depth ... tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
+Therefore, T-gate count is one of the most important metrics for classical hardness. Indeed for small T count and entanglement *Tensor Network* simulators have great scaling (see https://pennylane.ai/qml/demos/tutorial_tn_circuits). However, large non-Clifford content (also called *magic*)  make these simulators scale roughly exponentially in the T-count. A moderate number of T gates is enough to make these methods blow up. Additionally, if the circuit scrambles across the device like in random circuits, or deep Clifford+T, QAOA at higher depth ... tensor networks lose their advantage. In that regime, a dense Schrödinger statevector—despite its $\Theta(2^n)$ memory—often becomes the fastest practical option up to the memory ceiling, especially on GPUs and multi-node HPC. Why?
 - **Data-parallelism** maps perfectly to hardware: every 1–2 qubit gate is a bulk stream over the $2^n$ amplitudes. 
 - **Predictable scaling**: As you throw more cores/GPUs/nodes at it, you get near-linear speedups until communication dominates.
 - **Mature kernels**: libraries like cuStateVec / Pennylane Lightning / Qulacs / Qiskit Aer have hand-tuned kernels that squeeze the last drop out of CPUs/GPUs.

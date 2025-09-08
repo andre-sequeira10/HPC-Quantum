@@ -92,7 +92,7 @@ def Diffuser(nqubits):
 #target_state.set_computational_basis(2**n_qubits-1)
 
 ## Run Grover's algorithm
-state = QuantumState(n_qubits, use_multi_cpu=True)
+state = QuantumState(n_qubits, use_multi_cpu=False)
 state.set_zero_state()
 
 def make_Hadamard(nqubits):
@@ -113,7 +113,7 @@ optimal_iterations = int(np.floor(np.pi/4 * np.sqrt(2**n_qubits/elements)))
 
 #for i in range(optimal_iterations):
 #just 10 grover iterations
-for i in range(300):
+for i in range(10):
     U_w.update_quantum_state(state)
     U_s.update_quantum_state(state)
 

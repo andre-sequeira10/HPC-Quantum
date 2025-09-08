@@ -259,7 +259,6 @@ For a k-qubit gate on n qubits you have $W = 2^{n-k}$ independent chunks.
 Examples:
 - $n=3$, 2-qubit gate → $W=2$: up to 2 threads useful.
 - $n=4$, 2-qubit gate → $W=4$: up to 4 threads useful.
-- $n=26$, 2-qubit gate → $W=2^{24}$: plenty of work; 48 cores can be kept busy.
 
 🔹 **Choosing the thread count T**
 
@@ -278,7 +277,7 @@ If $2^{n-k}< \text{hardware threads}$ (e.g., small n), you simply don’t have e
 - Each compute core can handle one thread, resulting in a total of 48 threads per chip.
 - Each node has 32 GB HBM2 RAM. Therefore the partition has 52TB of RAM in total.
 
->From Table 1 we see that a single ARM compute node can efficiently store and safely manipulate quantum states up to 30 qubits ( $16 \times 2^{30}=16$ GiB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
+>From Table 1 we see that a single ARM compute node can efficiently store and safely manipulate quantum states up to 30 qubits ( $16 \times 2^{30}=16$ GiB - For 31 qubits we no longer have room for workspace because the memory is saturated). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
 
  How can we schedule the number of threads on a single-node as a function of the number of qubits?
 
@@ -309,7 +308,7 @@ Beyond 8 qubits, we cannot usefully employ more than 48 threads on a single ARM 
 - Each compute core can handle one thread, resulting in a total of 128 threads per node.
 - Each node has 256GB RAM. Therefore the partition has 128TB of RAM in total.
 
->From Table 1 we see that a single x86 compute node can efficiently store and safely manipulate quantum states up to 33 qubits ( $16 \times 2^{33}=128$ GiB - conservative safe capacity per node that leaves room for workspace and OS). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
+>From Table 1 we see that a single x86 compute node can efficiently store and safely manipulate quantum states up to 33 qubits ($16 \times 2^{33}=128$ GiB). For larger quantum states, we need to distribute the state across multiple nodes (see Section 3).
 
 How can we schedule the number of threads on a single-node as a function of the number of qubits?
 
@@ -318,7 +317,7 @@ How can we schedule the number of threads on a single-node as a function of the 
 
 <div align="center">
 
-| Qubits \(n\) | 1-qubit gate \(T^*\) | 2-qubit gate \(T^*\) |
+| Qubits \(n\) | 1-qubit gate $T^*$ | 2-qubit gate $T^*$ |
 |---:|---:|---:|
 | 2 | 2 | 1 |
 | 3 | 4 | 2 |
@@ -426,8 +425,11 @@ Assume **1 rank per node** and nodes **$N$** such that
 | 38 | 4 TiB | 256 |
 | 39 | 8 TiB | 512 |
 | 40 | 16 TiB | 1024 |
+| 41 | 32 TiB | 2048 |
 <p><em>Table 4: Minimum number of ARM nodes required for distributed statevector simulation up to 40 qubits.</em></p>
 </div>
+
+>**NOTE**: ARM partition has 1632 nodes total; Therefore it fits 40 qubits comfortably.
 
 ### 3.2 Example: Deucalion's x86 partition <a id="32-example-deucalions-x86-partition-"></a>
 
@@ -445,10 +447,11 @@ Assume **1 rank per node** and nodes **$N$** such that
 | 40 | 16 TiB | 128 |
 | 41 | 32 TiB | 256 |
 | 42 | 64 TiB | 512 |
+
 <p><em>Table 5: Minimum number of x86 nodes required for distributed statevector simulation up to 42 qubits.</em></p>
 </div>
 
-*(x86 partition has 500 nodes total; up to 41 qubits fits comfortably.)*
+>**NOTE**: x86 partition has 500 nodes total; Therefore it fits 41 qubits comfortably.
 
 > **Inside each rank**, keep the single-node threading rule on the **local** problem size: for a $k$-qubit gate,
 > 
@@ -467,7 +470,7 @@ Assume **1 rank per node** and nodes **$N$** such that
 
 ---
 
-Let **C** be the **safe RAM per GPU** reserved for the state:
+Let **C** be the **safe RAM per GPU** reserved for the state - smallest power of two below the physical RAM.
 - A100-40: **C ≈ 32 GiB**
 - A100-80: **C ≈ 64 GiB**
 

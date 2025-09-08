@@ -19,7 +19,7 @@ ml CMake/3.29.3-GCCcore-13.3.0 \
    Ninja/1.12.1-GCCcore-13.3.0
 
 
-# Activate your environment
+# Activate your OWN environment
 source /projects/I20240010/qsim/kokkos-4.6.02/venv_kokkos_mpi/bin/activate
 
 # Set backend and threads
@@ -28,12 +28,8 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 export OMP_SCHEDULE=static
 
-export GOMP_CPU_AFFINITY="0-47"
-export OMP_DISPLAY_ENV=TRUE
 export KOKKOS_INSTALL_PATH=$HOME/kokkos-install/4.6.02/A64FX
 export CMAKE_PREFIX_PATH=:"${KOKKOS_INSTALL_PATH}":$CMAKE_PREFIX_PATH
-export PL_LIGHTNING_MPI_BUFF_ALLOC_FACTOR=0.5   # or use complex64 in code
-
 # Run
 srun python grover_pennylane.py --n_qubits ${SLURM_ARRAY_TASK_ID} 
 /usr/bin/time -f "elapsed=%E cpu=%P maxrss=%MKB" \

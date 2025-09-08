@@ -65,7 +65,7 @@ qc = QuantumCircuit(grover_op.num_qubits)
 qc.h(range(grover_op.num_qubits))
 # Apply Grover operator the optimal number of times
 #apply just for 10 steps
-qc.compose(grover_op.power(100), inplace=True)
+qc.compose(grover_op.power(10), inplace=True)
 # Measure all qubits
 qc.measure_all()
 

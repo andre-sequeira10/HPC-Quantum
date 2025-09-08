@@ -8,9 +8,9 @@
 #SBATCH --time=48:00:00
 #SBATCH --mem=0
 #SBATCH --exclusive
-#SBATCH --array=20 # independent array task
-#SBATCH -o grover_%a.out          # %a -> array index
-#SBATCH -e grover_%a.err
+#SBATCH --array=20,22,24,26,28 # independent array task
+#SBATCH -o grover_spread_%a_%j.out          # %a -> array index %j -> job ID
+#SBATCH -e grover_spread_%a_%j.err
 
 
 # Load environment
@@ -22,6 +22,9 @@ export OMP_PROC_BIND=spread
 export OMP_PLACES=cores
 
 # ---- EXECUTE ----------------------------------------------------------
+srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
+srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
+
 /usr/bin/time -f "elapsed=%E cpu=%P maxrss=%MKB" \
-              -o time_${SLURM_ARRAY_TASK_ID}.txt \
+              -o time_spread_${SLURM_ARRAY_TASK_ID}.txt \
     srun python grover_example.py --n_qubits ${SLURM_ARRAY_TASK_ID}
