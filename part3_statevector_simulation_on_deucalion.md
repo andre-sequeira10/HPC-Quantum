@@ -1043,7 +1043,7 @@ A particularly interesting result comes from the **PennyLane Lightning-Kokkos ba
 In summary, our Grover benchmark reveals a nuanced landscape:  
 - **Qulacs on ARM** is currently the fastest and most reliable simulator up to 30 qubits.  
 - **PennyLane-Kokkos ARM** already shows competitive performance and may surpass Qulacs ARM in the multi-node regime using a MPI supported from source installation (See [README_pennylane.md](README_pennylane.md) for instructions).
-- **Qiskit**, while widely used, lags behind in performance [ADD MULTI NODE RESULTS] 
+- **Qiskit**, while widely used, lags behind in performance. Specially in the multi-node regime due to lack of multi-node and multi-threading support in the current installation on Deucalion.
 
 These results emphasize the importance of continuous benchmarking, as simulator performance is evolving rapidly and software improvements can shift the balance of best practices for Deucalion users.
 
