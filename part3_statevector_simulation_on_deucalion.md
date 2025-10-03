@@ -104,7 +104,19 @@ where `<username>` is your Deucalion username.
    deucalion i2024000x                     JohnDoe
 ```
 
-Above there is an example for the output of the account listing command. It shows three user accounts along with their associated clusters differing in a single character. These are responsible for indicating which Deucalion partitions the account has access - "a" (ARM) , "g" (GPU) and "x" (x86). 
+Above there is an example for the output of the account listing command. It shows three user accounts along with their associated clusters differing in a single character. These are responsible for indicating which Deucalion partitions the account has access - "a" (ARM) , "g" (GPU) and "x" (x86). Additionally, you can check the accounts and computing time available to you by running the command `billing`, as presented below.
+
+```bash
+
+[johnDoe@ln01 ~]$ billing
+┏━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Account    ┃ Used (h) ┃ Limit (h) ┃ Used (%) ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
+│ i2024000a  │   403787 │   1000000 │    40.38 │
+│ i2024000g  │      755 │      1000 │    75.53 │
+│ i2024000x  │    21423 │    100000 │    21.42 │
+└────────────┴──────────┴───────────┴──────────┘
+```
 
 Provided your account has access to a given partition you can set it in your batch script using the `#SBATCH --partition` directive, by setting the partition name as in Table 2. 
 
