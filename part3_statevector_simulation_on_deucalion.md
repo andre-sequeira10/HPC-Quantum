@@ -24,7 +24,6 @@
 
 
 
-
 ## 1. Slurm Basics <a id="2-slurm-basics-"></a>
 
 An HPC cluster consists of multiple compute nodes, each equipped with processors, memory, and GPUs. Users access these resources by submitting jobs, which specify the required resources and how to execute their applications. On Deucalion, resource allocation and job scheduling is managed by [Slurm](https://slurm.schedmd.com/). To learn more about Slurm in a hands-on way, you can explore the interactive [Slurm Learning tutorial](http://slurmlearning.deic.dk/).
@@ -1317,7 +1316,7 @@ You can visualize QAOA's quantum circuit using `qulacsviz` same as in Grover's a
 
 <img src="images/qaoa_circuit_p2_n6.png" alt="QAOA circuit for Max-Cut" width="800"/>
 
-<p><em>Figure 2: QAOA quantum circuit in Qualacs for Max-Cut on a random graph with two layers, visualized with qulacsviz.</em></p>
+<p><em>Figure 4: QAOA quantum circuit in Qualacs for Max-Cut on a random graph with two layers, visualized with qulacsviz.</em></p>
 
 </div>
 
