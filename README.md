@@ -37,14 +37,18 @@ A hands-on tutorial series that takes you from **quantum computing foundations**
    Slurm basics; Deucalion's partitions overview; safe memory budgets; **working job scripts** for **GHZ**, **Grover**, and **QAOA** on ARM nodes.  
    👉 Read: **[part3_statevector_simulation_on_deucalion.md](part3_statevector_simulation_on_deucalion.md)**  
 
-4. **Scripts — ready-to-run Python & Slurm job scripts**  
+4. **Benchmarks — Grover & QAOA on Deucalion**
+   Performance benchmarks for Grover’s algorithm and QAOA on Deucalion’s ARM, x86 and GPU partitions.  
+   👉 Read: **[benchmarks.md](benchmarks.md)**
+   
+5. **Scripts — ready-to-run Python & Slurm job scripts**  
    A large set of examples lives in **`scripts/`**, organized by partition type:
    - **`scripts/arm_partition/`** — ARM A64FX CPU nodes; GHZ/Grover/QAOA with MPI/OpenMP in Qulacs, Qiskit and Pennylane; Matching `jobscript_*.sh`. 
    - **`scripts/x86_partition/`** — x86 EPYC CPU nodes; mirrors ARM examples with x86-tuned jobscripts.
    - **`scripts/gpu_partition/`** — A100 GPU nodes; Qulacs GPU and PennyLane/Qiskit Aer examples that leverage NVIDIA cuQuantum.
    Each example folder contains the Python source (e.g., `*.py`) **and** a Slurm job script you can submit as-is.
 
-5. **PennyLane (Lightning-Kokkos + MPI) — Manual install & Slurm**
+6. **PennyLane (Lightning-Kokkos + MPI) — Manual install & Slurm**
    Build-from-source instructions to enable distributed statevector simulation on Deucalion’s ARM nodes (OpenMP + MPI), plus usage notes.  
    👉 Read: **[README_pennylane.md](README_pennylane.md)**
    
