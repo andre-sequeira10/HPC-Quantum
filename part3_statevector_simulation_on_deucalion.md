@@ -17,7 +17,6 @@
     - [3.2 Grover's algorithm](#32-grovers-algorithm)
       - [3.2.1 ARM job](#321-arm-job)
       - [3.2.2 GPU job](#322-gpu-job)
-      - [3.2.3 Performance summary](#323-performance-summary)
     - [3.3 Quantum Approximate Optimization Algorithm (QAOA)](#33-quantum-approximate-optimization-algorithm-qaoa)
   - [4. References and additional information](#4-references-and-additional-information)
 
@@ -1010,57 +1009,9 @@ circuit.update_quantum_state(state)
 
 The resource request pairs --gpus=1 with --cpus-per-task=32, a sensible default on normal-a100-40 (see Section 1).
 
-⚠️ Note: As of now, Qulacs does not support a single distributed state vector across multiple GPUs. If you need multi-GPU distribution, you should use a different framework (e.g., nvidia CuQuantum or PennyLane / Qiskit that support easy access to multi-GPU simulation using nvidia CuQuantum as backend). See the provided examples under `scripts/gpu_partition/`.
-
-#### 3.2.3 Performance summary
-
-To better understand the performance of quantum circuit simulators on Deucalion, we benchmarked **Grover’s algorithm** with 10 iterations across different hardware partitions and simulation backends. For each configuration, we measured the **execution time as a function of the number of qubits**, averaging over three independent runs to smooth out noise.
+⚠️ Note: As of now, Qulacs does not support a distributed state vector across multiple GPUs. If you need multi-GPU distribution, you should use a different framework (e.g., nvidia CuQuantum or PennyLane / Qiskit that support easy access to multi-GPU simulation using nvidia CuQuantum as backend). See the provided examples under `scripts/gpu_partition/`.
 
 ---
-
-**Qulacs: ARM vs x86**  
-
-Figure&nbsp;2 isolates the performance of the **Qulacs simulator** for a single-node execution comparing Deucalion’s ARM and x86 CPU partitions. The results show that Qulacs on a small number of qubits regime has similar performance on ARM and x86. However, once we increase the number of qubits towards the single-node memory limit Qulacs on ARM starts outperforming the x86 partition. Crucially, ARM shows better performance even though it uses only 48 threads instead of the 128 threads available in x86. This confirms the suitability of ARM for large-scale statevector simulations. 
-
-
-<div align="center">
-
-<img src="images/grover_qulacs_arm_vs_x86.png" alt="Grover's algorithm strong scaling on Deucalion ARM partition" width="600"/>
-
-<p><em>Figure 2: Grover's algorithm with 10 iterations: Qulacs performance comparison between Deucalion's ARM and x86 partition.</em></p>
-
-</div>
-
---- 
-
-**Cross-simulator comparison**  
-
-Figure&nbsp;3 broadens the scope by comparing the **best-performing configuration of each simulator**—Qulacs, Qiskit, and PennyLane—on both ARM and x86. For clarity, only the fastest variant of each simulator–partition pair is included in the plot. Vertical dashed lines mark the **single-node memory limits**, namely **30 qubits for ARM** and **33 qubits for x86**, as derived in Table&nbsp;3 and Table&nbsp;4, respectively. 
-
-<div align="center">
-
-<img src="images/grover_performance_simulators.png" alt="Grover's algorithm GPU vs CPU performance" width="600"/>
-
-<p><em>Figure 3: Grover's algorithm with 10 iterations: Qulacs, Qiskit and PennyLane performance comparison between Deucalion's ARM and x86 partitions with single and multi node.</em></p>
-
-</div>
-
-Within the single-node regime, Qulacs on ARM is also slightly faster than Qiskit on x86, underscoring again the advantage of Qulacs on single-node computation. Beyond 30 qubits, Qulacs on ARM requires doubling the number of nodes. Still, it can be clearly seen that in the multi-node regime Qulacs on ARM remains faster than Qiskit on x86 single-node, although using more resources for 32 and 33 qubits.
-
-Note that in the plot there are no multi-node results for Qiskit. This is because, as of this writing, **Qiskit installation on Deucalion does not support multi node and multi threading simultaneously**, and therefore, the performance is substantially hindered.  
-
-A particularly interesting result comes from the **PennyLane Lightning-Kokkos backend**, which was installed manually and it is not yet available on Deucalion as a simple `ml pennylane` module. (For users interested in reproducing our results, instructions are provided in [README_pennylane.md](README_pennylane.md).) In the single-node regime, PennyLane-Kokkos on ARM performs **at least comparably to Qulacs ARM**, which is notable given its recent appearance in the HPC ecosystem. However, due to current memory management limitations, PennyLane-Kokkos ARM is unable to simulate 30 qubits in a single node, reaching only 28 qubits. Beyond this point, the simulator requires **twice as many nodes as Qulacs ARM** for the same problem size. This limitation is already being addressed by the PennyLane developers ([GitHub issue #1176](https://github.com/PennyLaneAI/pennylane-lightning/pull/1176)), and once resolved, we expect PennyLane to extend its single-node reach and lower its multi-node requirements. Still, PennyLane-Kokkos ARM demonstrates superior multi-node performance, noticing Qulacs ARM performance with the same number of nodes as PennyLane-Kokkos ARM (depicted in light blue) indicating strong potential for scaling once the memory fix is in place.
-
-In summary, our Grover benchmark reveals a nuanced landscape:  
-- **Qulacs on ARM** is currently the fastest and most reliable simulator up to 30 qubits.  
-- **PennyLane-Kokkos ARM** already shows competitive performance and may surpass Qulacs ARM in the multi-node regime using a MPI supported from source installation (See [README_pennylane.md](README_pennylane.md) for instructions).
-- **Qiskit**, while widely used, lags behind in performance. Specially in the multi-node regime due to lack of multi-node and multi-threading support in the current installation on Deucalion.
-
-These results emphasize the importance of continuous benchmarking, as simulator performance is evolving rapidly and software improvements can shift the balance of best practices for Deucalion users.
-
- 
----
-
 
 ### 3.3 Quantum Approximate Optimization Algorithm (QAOA)
 

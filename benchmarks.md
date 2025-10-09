@@ -355,14 +355,14 @@ Figure&nbsp;3 broadens the scope by comparing the **best-performing configuratio
 
 Within the single-node regime, Qulacs on ARM is also slightly faster than Qiskit on x86, underscoring again the advantage of Qulacs on single-node computation. Beyond 30 qubits, Qulacs on ARM requires doubling the number of nodes. Still, it can be clearly seen that in the multi-node regime Qulacs on ARM remains faster than Qiskit on x86 single-node, although using more resources for 32 and 33 qubits.
 
-Note that in the plot there are no multi-node results for Qiskit. This is because, as of this writing, **Qiskit installation on Deucalion does not support multi node and multi threading simultaneously**, and therefore, the performance is substantially hindered.  
-
 A particularly interesting result comes from the **PennyLane Lightning-Kokkos backend**, which was installed manually and it is not yet available on Deucalion as a simple `ml pennylane` module. (For users interested in reproducing our results, instructions are provided in [README_pennylane.md](README_pennylane.md).) In the single-node regime, PennyLane-Kokkos on ARM performs **at least comparably to Qulacs ARM**, which is notable given its recent appearance in the HPC ecosystem. However, due to current memory management limitations, PennyLane-Kokkos ARM is unable to simulate 30 qubits in a single node, reaching only 28 qubits. Beyond this point, the simulator requires **twice as many nodes as Qulacs ARM** for the same problem size. This limitation is already being addressed by the PennyLane developers ([GitHub issue #1176](https://github.com/PennyLaneAI/pennylane-lightning/pull/1176)), and once resolved, we expect PennyLane to extend its single-node reach and lower its multi-node requirements. Still, PennyLane-Kokkos ARM demonstrates superior multi-node performance, noticing Qulacs ARM performance with the same number of nodes as PennyLane-Kokkos ARM (depicted in light blue) indicating strong potential for scaling once the memory fix is in place.
 
 In summary, our Grover benchmark reveals a nuanced landscape:  
 - **Qulacs on ARM** is currently the fastest and most reliable simulator up to 30 qubits.  
 - **PennyLane-Kokkos ARM** already shows competitive performance and may surpass Qulacs ARM in the multi-node regime using a MPI supported from source installation (See [README_pennylane.md](README_pennylane.md) for instructions).
-- **Qiskit**, while widely used, lags behind in performance. Specially in the multi-node regime due to lack of multi-node and multi-threading support in the current installation on Deucalion.
+- **Qiskit**, while widely used, lags behind in performance. Specially in the multi-node regime that does not have many tutorials and benchmarks available online for users to follow. Furthermore, Qiskit has several modules that can be used to construct high level circuits and algorithms such as *qiskit-algorithms* or *qiskit-machine-learning* that are not widely tested on HPC systems. 
+
+>**NOTE** : On Deucalion, *qiskit-algorithms* can also be loaded as a module (`ml qiskit-algorithms/0.4.0-foss-2023a`). Keep in mind that loading qiskit algorithms will load the full Qiskit package as well so it is not necessary to load `qiskit` separately. 
 
 These results emphasize the importance of continuous benchmarking, as simulator performance is evolving rapidly and software improvements can shift the balance of best practices for Deucalion users.
 

@@ -72,7 +72,15 @@ Open the example’s `jobscript_*.sh` and set:
 Need to confirm your accounts?
 
 ```bash
-sacctmgr show Association where User=<username> format=Cluster,Account%30,User
+
+[johnDoe@ln01 ~]$ billing
+┏━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Account    ┃ Used (h) ┃ Limit (h) ┃ Used (%) ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
+│ i2024000a  │   403787 │   1000000 │    40.38 │
+│ i2024000g  │      755 │      1000 │    75.53 │
+│ i2024000x  │    21423 │    100000 │    21.42 │
+└────────────┴──────────┴───────────┴──────────┘
 ```
 
 2)	**Submit and monitor (ARM example: GHZ)**
@@ -84,6 +92,21 @@ squeue --me                          # monitor your job
 less ghz_<jobid>.out                 # inspect results
 ```
 
+### ⚙️ Qiskit on Deucalion
+
+Qiskit is already available as a module on Deucalion. Simply load it with:
+
+```bash
+ml Qiskit
+```
+
+The module includes Qiskit Aer and it is compiled with MPI support. Therefore, you can run distributed simulations with Qiskit Aer on Deucalion’s ARM, x86 and GPU partitions. It is installed version 2.0.2. 
+
+>**NOTE** : Qiskit has several modules that can be used to construct high level circuits and algorithms such as *qiskit-algorithms* or *qiskit-machine-learning*. However, these are not widely tested for distributed simulations on HPC systems.
+>
+>On Deucalion, *qiskit-algorithms* can also be loaded as a module (`ml qiskit-algorithms/0.4.0-foss-2023a`). Keep in mind that loading qiskit algorithms will load the full Qiskit package as well so it is not necessary to load `qiskit` separately. 
+
+You can also install Qiskit in a virtual environment or conda environment if you want to use a different version than the one provided as a module. Keep in mind that you will need to install Qiskit Aer with MPI support from source, as the pip version does not include MPI support. See the instructions in the Qiskit documentation: https://qiskit.github.io/qiskit-aer/getting_started.html
 
 ### ⚙️ PennyLane on Deucalion (Lightning-Kokkos + MPI)
 
