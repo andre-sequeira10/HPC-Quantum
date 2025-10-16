@@ -39,13 +39,8 @@ mkdir -p ${KOKKOS_INSTALL_PATH}
 
 # Configure & build (A64FX + OpenMP)
 cmake -S . -B build -G Ninja \
-    -DCMAKE_BUILD_TYPE=RelWithDebugInfo \
-    -DCMAKE_INSTALL_PREFIX=${KOKKOS_INSTALL_PATH} \
-    -DBUILD_SHARED_LIBS:BOOL=ON \
-    -DBUILD_TESTING:BOOL=OFF \
-    -DKokkos_ENABLE_SERIAL:BOOL=ON \
-	-DKokkos_ARCH_A64FX:BOOL=ON \
-    -DKokkos_ENABLE_OPENMP=ON 
+    -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DCMAKE_INSTALL_PREFIX=${KOKKOS_INSTALL_PATH} -DBUILD_SHARED_LIBS:BOOL=ON -DBUILD_TESTING:BOOL=OFF -DKokkos_ENABLE_SERIAL:BOOL=ON -DKokkos_ARCH_A64FX:BOOL=ON -DKokkos_ENABLE_OPENMP=ON -DKokkos_ENABLE_COMPLEX_ALIGN=OFF
+
 
 cmake --build build && cmake --install build
 export CMAKE_PREFIX_PATH=:"${KOKKOS_INSTALL_PATH}":$CMAKE_PREFIX_PATH
@@ -83,10 +78,6 @@ SKIP_COMPILATION=True pip install -e . --config-settings editable_mode=compat
 # 4.2 Configure and build Lightning-Kokkos with OpenMP + MPI on A64FX
 PL_BACKEND="lightning_kokkos" python scripts/configure_pyproject_toml.py
 
-# Ensure CMake sees your Kokkos, and enable MPI + A64FX
-export KOKKOS_INSTALL_PATH=$HOME/kokkos-install/4.6.02/A64FX
-export CMAKE_PREFIX_PATH="${KOKKOS_INSTALL_PATH}:${CMAKE_PREFIX_PATH}"
-export LD_LIBRARY_PATH="${KOKKOS_INSTALL_PATH}/lib:${LD_LIBRARY_PATH}"
 
 CMAKE_ARGS="-DKokkos_ENABLE_OPENMP=ON -DENABLE_MPI=ON -DKokkos_ARCH_A64FX=ON" \
   python -m pip install -e . --config-settings editable_mode=compat -vv
